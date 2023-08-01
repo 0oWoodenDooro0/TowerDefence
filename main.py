@@ -1,8 +1,9 @@
-import constants as c
 import pygame as pg
+
+import constants as c
 from enemy import Enemy
-from world import World
 from tower import Tower
+from world import World
 
 pg.init()
 
@@ -16,6 +17,21 @@ map_image = pg.image.load('assets/level/level1.png').convert_alpha()
 enemy_image = pg.image.load('assets/enemy/enemy1.png').convert_alpha()
 
 cursor_tower = pg.image.load('assets/tower/tower1.png').convert_alpha()
+
+
+def create_tower(mouse_pos):
+    mouse_tile_x = mouse_pos[0] // c.TILE_SIZE
+    mouse_tile_y = mouse_pos[1] // c.TILE_SIZE
+    mouse_tile_num = (mouse_tile_y * c.COLS) + mouse_tile_x
+    if world.tile_map[mouse_tile_num] == 25:
+        space_is_free = True
+        for tower in tower_group:
+            if (mouse_tile_x, mouse_tile_y) == (tower.tile_x, tower.tile_y):
+                space_is_free = False
+        if space_is_free:
+            tower = Tower(cursor_tower, mouse_tile_x, mouse_tile_y)
+            tower_group.add(tower)
+
 
 world = World(map_image)
 
@@ -45,8 +61,7 @@ while run:
             run = False
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pg.mouse.get_pos()
-            tower = Tower(cursor_tower, mouse_pos)
-            tower_group.add(tower)
+            create_tower(mouse_pos)
 
     pg.display.flip()
 
