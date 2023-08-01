@@ -9,14 +9,17 @@ pg.init()
 
 clock = pg.time.Clock()
 
-screen = pg.display.set_mode((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+screen = pg.display.set_mode((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
 pg.display.set_caption(c.TITLE)
 
 map_image = pg.image.load('assets/level/level1.png').convert_alpha()
 
+cursor_tower = pg.image.load('assets/tower/tower1.png').convert_alpha()
+
 enemy_image = pg.image.load('assets/enemy/enemy1.png').convert_alpha()
 
-cursor_tower = pg.image.load('assets/tower/tower1.png').convert_alpha()
+buy_tower_image = pg.image.load('assets/buttons/buy_tower.png').convert_alpha()
+cancel_image = pg.image.load('assets/buttons/cancel.png').convert_alpha()
 
 
 def create_tower(mouse_pos):
