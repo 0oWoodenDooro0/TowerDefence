@@ -29,8 +29,8 @@ def create_tower(mouse_pos):
             if (mouse_tile_x, mouse_tile_y) == (tower.tile_x, tower.tile_y):
                 space_is_free = False
         if space_is_free:
-            tower = Tower(cursor_tower, mouse_tile_x, mouse_tile_y)
-            tower_group.add(tower)
+            new_tower = Tower(cursor_tower, mouse_tile_x, mouse_tile_y)
+            tower_group.add(new_tower)
 
 
 world = World(map_image)
