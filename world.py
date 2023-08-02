@@ -1,5 +1,5 @@
-import pygame as pg
 import constants as c
+
 
 class World:
     def __init__(self, map_image):

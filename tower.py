@@ -1,14 +1,18 @@
-import pygame as pg
-import constants as c
 import math
+
+import pygame as pg
+
+import constants as c
+from turret_data import TURRET_DATA
 
 
 class Tower(pg.sprite.Sprite):
     def __init__(self, image, tile_x, tile_y):
         pg.sprite.Sprite.__init__(self)
         self.target = None
-        self.range = 180
-        self.cooldown = 1500
+        self.level = 1
+        self.range = TURRET_DATA[self.level - 1].get("range")
+        self.cooldown = TURRET_DATA[self.level - 1].get("cooldown")
         self.last_shot = pg.time.get_ticks()
         self.selected = False
 
@@ -38,6 +42,19 @@ class Tower(pg.sprite.Sprite):
         else:
             if pg.time.get_ticks() - self.last_shot > self.cooldown:
                 self.pick_target(enemy_group)
+
+    def upgrade(self):
+        self.level += 1
+        self.range = TURRET_DATA[self.level - 1].get("range")
+        self.cooldown = TURRET_DATA[self.level - 1].get("cooldown")
+
+        self.range_image = pg.Surface((self.range * 2, self.range * 2))
+        self.range_image.fill((0, 0, 0))
+        self.range_image.set_colorkey((0, 0, 0))
+        pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range)
+        self.range_image.set_alpha(100)
+        self.range_rect = self.range_image.get_rect()
+        self.range_rect.center = self.rect.center
 
     def pick_target(self, enemy_group):
         for enemy in enemy_group:
