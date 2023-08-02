@@ -98,7 +98,7 @@ while run:
             selected_tile = None
     elif selected_tower:
         selected_tower.selected = True
-        if upgrade_tower_button.draw(screen):
+        if selected_tower.level < c.MAX_LEVEL and upgrade_tower_button.draw(screen):
             selected_tower.upgrade()
 
     # event
