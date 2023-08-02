@@ -3,18 +3,21 @@ import math
 import pygame as pg
 
 import constants as c
-from turret_data import TURRET_DATA
+from tower_data import TOWER_DATA
 
 
 class Tower(pg.sprite.Sprite):
     def __init__(self, image, tile_x, tile_y):
         pg.sprite.Sprite.__init__(self)
-        self.target = None
         self.level = 1
-        self.range = TURRET_DATA[self.level - 1].get("range")
-        self.cooldown = TURRET_DATA[self.level - 1].get("cooldown")
-        self.last_shot = pg.time.get_ticks()
+        self.damage = TOWER_DATA[self.level - 1].get("damage")
+        self.range = TOWER_DATA[self.level - 1].get("range")
+        self.cooldown = TOWER_DATA[self.level - 1].get("cooldown")
+        self.cost = TOWER_DATA[self.level - 1].get("cost")
+
+        self.target = None
         self.selected = False
+        self.last_shot = pg.time.get_ticks() - self.cooldown
 
         self.tile_x = tile_x
         self.tile_y = tile_y
@@ -36,17 +39,17 @@ class Tower(pg.sprite.Sprite):
         self.range_rect.center = self.rect.center
 
     def update(self, enemy_group):
-        if self.target:
+        if pg.time.get_ticks() - self.last_shot > self.cooldown and self.target:
+            self.target.health -= self.damage
             self.last_shot = pg.time.get_ticks()
-            self.target = None
-        else:
-            if pg.time.get_ticks() - self.last_shot > self.cooldown:
-                self.pick_target(enemy_group)
+        self.pick_target(enemy_group)
 
     def upgrade(self):
         self.level += 1
-        self.range = TURRET_DATA[self.level - 1].get("range")
-        self.cooldown = TURRET_DATA[self.level - 1].get("cooldown")
+        self.damage = TOWER_DATA[self.level - 1].get("damage")
+        self.range = TOWER_DATA[self.level - 1].get("range")
+        self.cooldown = TOWER_DATA[self.level - 1].get("cooldown")
+        self.cost = TOWER_DATA[self.level - 1].get("cost")
 
         self.range_image = pg.Surface((self.range * 2, self.range * 2))
         self.range_image.fill((0, 0, 0))
@@ -64,6 +67,7 @@ class Tower(pg.sprite.Sprite):
             if dist < self.range:
                 self.target = enemy
                 self.angle = math.degrees(math.atan2(-y_dist, x_dist))
+                return
 
     def draw(self, surface):
         self.image = pg.transform.rotate(self.original_image, self.angle - 90)

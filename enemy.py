@@ -3,21 +3,29 @@ import math
 import pygame as pg
 from pygame.math import Vector2
 
+from enemy_data import ENEMY_DATA
+
 
 class Enemy(pg.sprite.Sprite):
-    def __init__(self, waypoints, image):
+    def __init__(self, enemy_type: str, waypoints: list, images: dict):
         pg.sprite.Sprite.__init__(self)
+        self.health = ENEMY_DATA.get(enemy_type)["health"]
+        self.speed = ENEMY_DATA.get(enemy_type)["speed"]
+        self.money = ENEMY_DATA.get(enemy_type)["money"]
+
+        self.target = None
+        self.movement = None
         self.waypoints = waypoints
-        self.pos = Vector2(self.waypoints[0])
         self.target_waypoint = 1
-        self.speed = 2
+        self.pos = Vector2(self.waypoints[0])
         self.angle = 0
-        self.original_image = image
+        self.original_image = images.get(enemy_type)
         self.image = pg.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
     def update(self):
+        if self.health <= 0: self.kill()
         self.move()
         self.rotate()
 
