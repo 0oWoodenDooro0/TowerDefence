@@ -39,10 +39,11 @@ class Tower(pg.sprite.Sprite):
         self.range_rect.center = self.rect.center
 
     def update(self, enemy_group):
+        self.pick_target(enemy_group)
         if pg.time.get_ticks() - self.last_shot > self.cooldown and self.target:
             self.target.health -= self.damage
             self.last_shot = pg.time.get_ticks()
-        self.pick_target(enemy_group)
+            self.target = None
 
     def upgrade(self):
         self.level += 1
@@ -61,13 +62,14 @@ class Tower(pg.sprite.Sprite):
 
     def pick_target(self, enemy_group):
         for enemy in enemy_group:
-            x_dist = enemy.pos[0] - self.x
-            y_dist = enemy.pos[1] - self.y
-            dist = math.sqrt(x_dist ** 2 + y_dist ** 2)
-            if dist < self.range:
-                self.target = enemy
-                self.angle = math.degrees(math.atan2(-y_dist, x_dist))
-                return
+            if enemy.health > 0:
+                x_dist = enemy.pos[0] - self.x
+                y_dist = enemy.pos[1] - self.y
+                dist = math.sqrt(x_dist ** 2 + y_dist ** 2)
+                if dist < self.range:
+                    self.target = enemy
+                    self.angle = math.degrees(math.atan2(-y_dist, x_dist))
+                    break
 
     def draw(self, surface):
         self.image = pg.transform.rotate(self.original_image, self.angle - 90)

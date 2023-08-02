@@ -24,16 +24,18 @@ class Enemy(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
-    def update(self):
-        if self.health <= 0: self.kill()
-        self.move()
+    def update(self, world):
+        self.check_alive(world)
+        self.move(world)
         self.rotate()
 
-    def move(self):
+    def move(self, world):
         if self.target_waypoint < len(self.waypoints):
             self.target = Vector2(self.waypoints[self.target_waypoint])
             self.movement = self.target - self.pos
         else:
+            world.health -= 1
+            world.missed_enemies += 1
             self.kill()
 
         dist = self.movement.length()
@@ -55,3 +57,9 @@ class Enemy(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
+
+    def check_alive(self, world):
+        if self.health <= 0:
+            world.money += self.money
+            world.killed_enemies += 1
+            self.kill()

@@ -1,6 +1,6 @@
 ENEMY_SPAWN_DATA = [
     {
-        "basic": 10,
+        "basic": 5,
         "fast": 0,
         "strong": 0
     },
@@ -11,40 +11,60 @@ ENEMY_SPAWN_DATA = [
     },
     {
         "basic": 10,
-        "fast": 0,
-        "strong": 5
-    },
-    {
-        "basic": 15,
-        "fast": 5,
+        "fast": 10,
         "strong": 0
     },
     {
-        "basic": 15,
+        "basic": 10,
         "fast": 5,
-        "strong": 5
+        "strong": 10
     },
     {
-        "basic": 5,
+        "basic": 20,
         "fast": 10,
         "strong": 5
+    },
+    {
+        "basic": 20,
+        "fast": 20,
+        "strong": 10
+    },
+    {
+        "basic": 30,
+        "fast": 15,
+        "strong": 20
+    },
+    {
+        "basic": 40,
+        "fast": 20,
+        "strong": 15
+    },
+    {
+        "basic": 40,
+        "fast": 20,
+        "strong": 20
+    },
+    {
+        "basic": 50,
+        "fast": 40,
+        "strong": 35
     }
 ]
 
 ENEMY_DATA = {
     "basic": {
-        "health": 30,
+        "health": 40,
         "speed": 3,
-        "money": 10
+        "money": 5
     },
     "fast": {
-        "health": 20,
+        "health": 35,
         "speed": 4,
-        "money": 15
+        "money": 8
     },
     "strong": {
-        "health": 80,
+        "health": 100,
         "speed": 2.5,
-        "money": 20
+        "money": 10
     }
 }

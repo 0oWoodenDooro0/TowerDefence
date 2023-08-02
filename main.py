@@ -13,6 +13,8 @@ clock = pg.time.Clock()
 screen = pg.display.set_mode((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
 pg.display.set_caption(c.TITLE)
 # game variables
+level_started: bool = False
+game_over: bool = False
 last_enemy_spawn = pg.time.get_ticks()
 selected_tower: Tower | None = None
 selected_tile: tuple | None = None
@@ -30,7 +32,10 @@ enemy_images = {
 
 buy_tower_image = pg.image.load('assets/buttons/buy_tower.png').convert_alpha()
 upgrade_tower_image = pg.image.load('assets/buttons/upgrade_tower.png').convert_alpha()
-cancel_image = pg.image.load('assets/buttons/cancel.png').convert_alpha()
+start_image = pg.image.load('assets/buttons/start.png').convert_alpha()
+sell_image = pg.image.load('assets/buttons/sell.png').convert_alpha()
+
+bullet_image = pg.image.load('assets/bullet/bullet.png').convert_alpha()
 
 # load font
 text_font = pg.font.Font('assets/NotoSansTC-Regular.otf', 24)
@@ -82,20 +87,25 @@ tower_group = pg.sprite.Group()
 
 buy_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image, True)
 upgrade_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, upgrade_tower_image, True)
-# cancel_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, cancel_image, True)
+start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2, start_image, True)
+sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image, True)
 
 run = True
 while run:
 
     clock.tick(c.FPS)
+
     # Updating
     screen.fill("grey100")
+    if not game_over:
+        if world.health <= 0:
+            game_over = True
 
-    enemy_group.update()
-    tower_group.update(enemy_group)
+        enemy_group.update(world)
+        tower_group.update(enemy_group)
 
-    if selected_tower:
-        selected_tower.selected = True
+        if selected_tower:
+            selected_tower.selected = True
     # Drawing
     world.draw(screen)
 
@@ -105,25 +115,42 @@ while run:
 
     draw_text(f'Health: {world.health}', text_font, "black", c.SCREEN_WIDTH + 5, 0)
     draw_text(f'Money: {world.money}', text_font, "black", c.SCREEN_WIDTH + 5, 25)
+    draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 50)
 
-    if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
-        if world.spawned_enemies < len(world.enemy_list):
-            enemy_type = world.enemy_list[world.spawned_enemies]
-            enemy = Enemy(enemy_type, world.waypoints, enemy_images)
-            enemy_group.add(enemy)
-            world.spawned_enemies += 1
+    if not game_over:
+        if not level_started:
+            if start_button.draw(screen):
+                level_started = True
+        else:
+            if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN:
+                if world.spawned_enemies < len(world.enemy_list):
+                    enemy_type = world.enemy_list[world.spawned_enemies]
+                    enemy = Enemy(enemy_type, world.waypoints, enemy_images)
+                    enemy_group.add(enemy)
+                    world.spawned_enemies += 1
+                    last_enemy_spawn = pg.time.get_ticks()
+
+        if world.check_level_completed() and world.level < c.MAP_MAX_LEVEL:
+            level_started = False
+            world.level += 1
             last_enemy_spawn = pg.time.get_ticks()
+            world.reset_level()
+            world.process_enemies()
 
-    if selected_tile:
-        if buy_tower_button.draw(screen) and world.money > c.TOWER_COST:
-            create_tower(selected_tile)
-            world.money -= c.TOWER_COST
-            selected_tile = None
-    elif selected_tower:
-        selected_tower.selected = True
-        if selected_tower.level < c.MAX_LEVEL and upgrade_tower_button.draw(screen) and world.money > selected_tower.cost:
-            world.money -= selected_tower.cost
-            selected_tower.upgrade()
+        if selected_tile:
+            draw_text(f'Cost: {c.TOWER_COST}', text_font, "black", c.SCREEN_WIDTH + 25, c.SCREEN_HEIGHT - 110)
+            if buy_tower_button.draw(screen) and world.money >= c.TOWER_COST:
+                create_tower(selected_tile)
+                world.money -= c.TOWER_COST
+                selected_tile = None
+        elif selected_tower:
+            selected_tower.selected = True
+
+            if selected_tower.level < c.TOWER_MAX_LEVEL:
+                draw_text(f'Cost: {selected_tower.cost}', text_font, "black", c.SCREEN_WIDTH + 25, c.SCREEN_HEIGHT - 110)
+                if upgrade_tower_button.draw(screen) and world.money >= selected_tower.cost:
+                    world.money -= selected_tower.cost
+                    selected_tower.upgrade()
 
     # event
     for event in pg.event.get():
@@ -132,6 +159,7 @@ while run:
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pg.mouse.get_pos()
             if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
+                selected_tile = None
                 selected_tower = None
                 clear_selection()
                 selected_tower = select_tower(mouse_pos)
