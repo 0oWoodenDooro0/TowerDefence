@@ -11,7 +11,7 @@ class Enemy(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.health_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["health_level_growth"]
         self.speed_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["speed_level_growth"]
-        self.health = ENEMY_TYPE_DATA.get(enemy_type)["health"] + self.health_level_growth * level ** 1.25
+        self.health = ENEMY_TYPE_DATA.get(enemy_type)["health"] + self.health_level_growth * level ** 1.2
         self.speed = ENEMY_TYPE_DATA.get(enemy_type)["speed"] + self.speed_level_growth * level
         self.money = ENEMY_TYPE_DATA.get(enemy_type)["money"]
 
@@ -42,8 +42,8 @@ class Enemy(pg.sprite.Sprite):
 
         dist = self.movement.length()
 
-        if dist >= self.speed:
-            self.pos += self.movement.normalize() * self.speed
+        if dist >= self.speed * world.game_speed:
+            self.pos += self.movement.normalize() * self.speed * world.game_speed
         else:
             if dist != 0:
                 self.pos += self.movement.normalize() * dist

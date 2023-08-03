@@ -15,12 +15,12 @@ class Bullet(pg.sprite.Sprite):
         self.damage = damage
         self.collided = False
 
-    def update(self):
+    def update(self, world):
         target_vector = Vector2(self.target.pos)
         movement = target_vector - self.pos
         dist = movement.length()
-        if dist >= self.speed:
-            self.pos += movement.normalize() * self.speed
+        if dist >= self.speed * world.game_speed:
+            self.pos += movement.normalize() * self.speed * world.game_speed
         else:
             if dist != 0:
                 self.pos += movement.normalize() * dist

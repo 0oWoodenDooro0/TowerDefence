@@ -42,9 +42,9 @@ class Tower(pg.sprite.Sprite):
         self.range_rect = self.range_image.get_rect()
         self.range_rect.center = self.rect.center
 
-    def update(self, enemy_group, bullet_group: pg.sprite.Group):
+    def update(self, enemy_group, bullet_group: pg.sprite.Group, world):
         self.pick_target(enemy_group)
-        if pg.time.get_ticks() - self.last_shot > self.cooldown and self.target:
+        if pg.time.get_ticks() - self.last_shot > self.cooldown / world.game_speed and self.target:
             new_bullet = Bullet(self.x, self.y, self.target, self.damage)
             bullet_group.add(new_bullet)
             self.last_shot = pg.time.get_ticks()
