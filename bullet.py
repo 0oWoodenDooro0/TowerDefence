@@ -6,7 +6,7 @@ from enemy import Enemy
 class Bullet(pg.sprite.Sprite):
     def __init__(self, x, y, target: Enemy, damage: int):
         pg.sprite.Sprite.__init__(self)
-        self.speed = 20
+        self.speed = 15
         self.pos = Vector2(x, y)
         self.image = pg.image.load('assets/bullet/bullet.png').convert_alpha()
         self.rect = self.image.get_rect()
