@@ -3,15 +3,17 @@ import math
 import pygame as pg
 from pygame.math import Vector2
 
-from enemy_data import ENEMY_DATA
+from enemy_data import ENEMY_TYPE_DATA
 
 
 class Enemy(pg.sprite.Sprite):
-    def __init__(self, enemy_type: str, waypoints: list, images: dict):
+    def __init__(self, enemy_type: str, waypoints: list, images: dict, level: int):
         pg.sprite.Sprite.__init__(self)
-        self.health = ENEMY_DATA.get(enemy_type)["health"]
-        self.speed = ENEMY_DATA.get(enemy_type)["speed"]
-        self.money = ENEMY_DATA.get(enemy_type)["money"]
+        self.health_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["health_level_growth"]
+        self.speed_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["speed_level_growth"]
+        self.health = ENEMY_TYPE_DATA.get(enemy_type)["health"] + self.health_level_growth * level ** 1.25
+        self.speed = ENEMY_TYPE_DATA.get(enemy_type)["speed"] + self.speed_level_growth * level
+        self.money = ENEMY_TYPE_DATA.get(enemy_type)["money"]
 
         self.target = None
         self.movement = None

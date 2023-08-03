@@ -6,7 +6,7 @@ class Button:
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.clicked = False
+        self.clicked = True
         self.single_click = single_click
 
     def draw(self, surface):
@@ -25,3 +25,8 @@ class Button:
         surface.blit(self.image, self.rect)
 
         return action
+
+    def change_image(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)

@@ -4,16 +4,19 @@ import pygame as pg
 
 import constants as c
 from tower_data import TOWER_DATA
+from bullet import Bullet
 
 
 class Tower(pg.sprite.Sprite):
-    def __init__(self, image, tile_x, tile_y):
+    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: str, tile_x, tile_y):
         pg.sprite.Sprite.__init__(self)
         self.level = 1
-        self.damage = TOWER_DATA[self.level - 1].get("damage")
-        self.range = TOWER_DATA[self.level - 1].get("range")
-        self.cooldown = TOWER_DATA[self.level - 1].get("cooldown")
-        self.cost = TOWER_DATA[self.level - 1].get("cost")
+        self.tower_type = tower_type
+        self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage")
+        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range")
+        self.cooldown = TOWER_DATA[self.tower_type][self.level - 1].get("cooldown")
+        self.cost = TOWER_DATA[self.tower_type][self.level - 1].get("cost")
+        self.sell = TOWER_DATA[self.tower_type][self.level - 1].get("sell")
 
         self.target = None
         self.selected = False
@@ -25,7 +28,8 @@ class Tower(pg.sprite.Sprite):
         self.y = (self.tile_y + 0.5) * c.TILE_SIZE
 
         self.angle = 90
-        self.original_image = image
+        self.original_image = tower_images[tower_type]
+        self.tower_base_image = tower_base_images[tower_type]
         self.image = pg.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
@@ -38,19 +42,21 @@ class Tower(pg.sprite.Sprite):
         self.range_rect = self.range_image.get_rect()
         self.range_rect.center = self.rect.center
 
-    def update(self, enemy_group):
+    def update(self, enemy_group, bullet_group: pg.sprite.Group):
         self.pick_target(enemy_group)
         if pg.time.get_ticks() - self.last_shot > self.cooldown and self.target:
-            self.target.health -= self.damage
+            new_bullet = Bullet(self.x, self.y, self.target, self.damage)
+            bullet_group.add(new_bullet)
             self.last_shot = pg.time.get_ticks()
-            self.target = None
+        self.target = None
 
     def upgrade(self):
         self.level += 1
-        self.damage = TOWER_DATA[self.level - 1].get("damage")
-        self.range = TOWER_DATA[self.level - 1].get("range")
-        self.cooldown = TOWER_DATA[self.level - 1].get("cooldown")
-        self.cost = TOWER_DATA[self.level - 1].get("cost")
+        self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage")
+        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range")
+        self.cooldown = TOWER_DATA[self.tower_type][self.level - 1].get("cooldown")
+        self.cost = TOWER_DATA[self.tower_type][self.level - 1].get("cost")
+        self.sell = TOWER_DATA[self.tower_type][self.level - 1].get("sell")
 
         self.range_image = pg.Surface((self.range * 2, self.range * 2))
         self.range_image.fill((0, 0, 0))
@@ -72,6 +78,9 @@ class Tower(pg.sprite.Sprite):
                     break
 
     def draw(self, surface):
+        tower_base_rect = self.tower_base_image.get_rect()
+        tower_base_rect.center = (self.x, self.y)
+        surface.blit(self.tower_base_image, tower_base_rect)
         self.image = pg.transform.rotate(self.original_image, self.angle - 90)
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)

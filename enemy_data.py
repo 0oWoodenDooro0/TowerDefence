@@ -5,66 +5,72 @@ ENEMY_SPAWN_DATA = [
         "strong": 0
     },
     {
-        "basic": 5,
+        "basic": 0,
         "fast": 5,
         "strong": 0
     },
     {
-        "basic": 10,
-        "fast": 10,
-        "strong": 0
+        "basic": 0,
+        "fast": 5,
+        "strong": 5
     },
     {
         "basic": 10,
         "fast": 5,
-        "strong": 10
+        "strong": 5
     },
     {
-        "basic": 20,
+        "basic": 10,
         "fast": 10,
         "strong": 5
     },
     {
-        "basic": 20,
+        "basic": 0,
         "fast": 20,
+        "strong": 0
+    },
+    {
+        "basic": 0,
+        "fast": 0,
+        "strong": 20
+    },
+    {
+        "basic": 20,
+        "fast": 10,
         "strong": 10
     },
     {
         "basic": 30,
         "fast": 15,
-        "strong": 20
-    },
-    {
-        "basic": 40,
-        "fast": 20,
         "strong": 15
     },
     {
-        "basic": 40,
-        "fast": 20,
+        "basic": 30,
+        "fast": 30,
         "strong": 20
-    },
-    {
-        "basic": 50,
-        "fast": 40,
-        "strong": 35
     }
 ]
 
-ENEMY_DATA = {
+ENEMY_TYPE_DATA = {
     "basic": {
-        "health": 40,
-        "speed": 3,
-        "money": 5
+        "health": 5,
+        "speed": 1,
+        "money": 5,
+        "health_level_growth": 5,
+        "speed_level_growth": 0.2
     },
     "fast": {
-        "health": 35,
-        "speed": 4,
-        "money": 8
+        "health": 5,
+        "speed": 1,
+        "money": 8,
+        "health_level_growth": 5,
+        "speed_level_growth": 0.5
     },
     "strong": {
-        "health": 100,
-        "speed": 2.5,
-        "money": 10
+        "health": 5,
+        "speed": 1,
+        "money": 10,
+        "health_level_growth": 10,
+        "speed_level_growth": 0.1
     }
 }
