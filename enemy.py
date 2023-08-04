@@ -9,11 +9,13 @@ from enemy_data import ENEMY_TYPE_DATA
 class Enemy(pg.sprite.Sprite):
     def __init__(self, enemy_type: str, waypoints: list, images: dict, level: int):
         pg.sprite.Sprite.__init__(self)
+        self.enemy_type = enemy_type
         self.health_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["health_level_growth"]
         self.speed_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["speed_level_growth"]
-        self.health = ENEMY_TYPE_DATA.get(enemy_type)["health"] + self.health_level_growth * level ** 1.2
+        self.health = ENEMY_TYPE_DATA.get(enemy_type)["health"] + self.health_level_growth * level
         self.speed = ENEMY_TYPE_DATA.get(enemy_type)["speed"] + self.speed_level_growth * level
         self.money = ENEMY_TYPE_DATA.get(enemy_type)["money"]
+        self.slow_rate = 1
 
         self.target = None
         self.movement = None
@@ -42,8 +44,8 @@ class Enemy(pg.sprite.Sprite):
 
         dist = self.movement.length()
 
-        if dist >= self.speed * world.game_speed:
-            self.pos += self.movement.normalize() * self.speed * world.game_speed
+        if dist >= self.speed * world.game_speed * self.slow_rate:
+            self.pos += self.movement.normalize() * self.speed * world.game_speed * self.slow_rate
         else:
             if dist != 0:
                 self.pos += self.movement.normalize() * dist

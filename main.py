@@ -3,7 +3,7 @@ import pygame as pg
 import constants as c
 from button import Button
 from enemy import Enemy
-from tower import Tower
+from tower import Tower, AttackTower, EffectTower
 from world import World
 from tower_data import TOWER_TYPE_DATA
 
@@ -26,16 +26,20 @@ map_image = pg.image.load('assets/level/level1.png').convert_alpha()
 
 tower_images = {
     "basic": pg.image.load('assets/tower/tower1.png').convert_alpha(),
-    "sniper": pg.image.load('assets/tower/tower2.png').convert_alpha()
+    "sniper": pg.image.load('assets/tower/tower2.png').convert_alpha(),
+    "cannon": pg.image.load('assets/tower/tower3.png').convert_alpha(),
+    "freeze": pg.image.load('assets/tower/tower4.png').convert_alpha()
 }
 
 tower_base_images = {
     "basic": pg.image.load('assets/tower/tower_base1.png').convert_alpha(),
-    "sniper": pg.image.load('assets/tower/tower_base2.png').convert_alpha()
+    "sniper": pg.image.load('assets/tower/tower_base2.png').convert_alpha(),
+    "cannon": pg.image.load('assets/tower/tower_base3.png').convert_alpha(),
+    "freeze": pg.image.load('assets/tower/tower_base4.png').convert_alpha()
 }
 
 enemy_images = {
-    "basic": pg.image.load('assets/enemy/enemy1.png').convert_alpha(),
+    "regular": pg.image.load('assets/enemy/enemy1.png').convert_alpha(),
     "fast": pg.image.load('assets/enemy/enemy2.png').convert_alpha(),
     "strong": pg.image.load('assets/enemy/enemy3.png').convert_alpha()
 }
@@ -46,6 +50,8 @@ start_image = pg.image.load('assets/buttons/start.png').convert_alpha()
 sell_image = pg.image.load('assets/buttons/sell.png').convert_alpha()
 tower1_btn_image = pg.image.load('assets/buttons/tower1_btn.png').convert_alpha()
 tower2_btn_image = pg.image.load('assets/buttons/tower2_btn.png').convert_alpha()
+tower3_btn_image = pg.image.load('assets/buttons/tower3_btn.png').convert_alpha()
+tower4_btn_image = pg.image.load('assets/buttons/tower4_btn.png').convert_alpha()
 
 speed_btn_image = [
     pg.image.load('assets/buttons/speed1x.png').convert_alpha(),
@@ -60,7 +66,11 @@ text_font = pg.font.Font('assets/NotoSansTC-Regular.otf', 24)
 
 
 def create_tower(selected_tile):
-    new_tower = Tower(tower_images, tower_base_images, selected_tower_type, selected_tile[0], selected_tile[1])
+    match selected_tower_type:
+        case "basic" | "sniper" | "cannon":
+            new_tower = AttackTower(tower_images, tower_base_images, selected_tower_type, selected_tile)
+        case "freeze":
+            new_tower = EffectTower(tower_images, tower_base_images, selected_tower_type, selected_tile)
     tower_group.add(new_tower)
     return new_tower
 
@@ -108,8 +118,10 @@ bullet_group = pg.sprite.Group()
 buy_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image, True)
 start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2, start_image, True)
 sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image, True)
-tower1_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2 + 90, tower1_btn_image, True)
-tower2_button = Button(c.SCREEN_WIDTH + 120, (c.SCREEN_HEIGHT - 30) // 2 + 90, tower2_btn_image, True)
+tower1_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 90, tower1_btn_image, True)
+tower2_button = Button(c.SCREEN_WIDTH + 110, (c.SCREEN_HEIGHT - 30) // 2 + 90, tower2_btn_image, True)
+tower3_button = Button(c.SCREEN_WIDTH + 205, (c.SCREEN_HEIGHT - 30) // 2 + 90, tower3_btn_image, True)
+tower4_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 185, tower4_btn_image, True)
 speed_up_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2, speed_btn_image[0], True)
 
 run = True
@@ -124,7 +136,7 @@ while run:
             game_over = True
 
         enemy_group.update(world)
-        bullet_group.update(world)
+        bullet_group.update(world, enemy_group)
         tower_group.update(enemy_group, bullet_group, world)
 
         if selected_tower:
@@ -134,7 +146,7 @@ while run:
 
     enemy_group.draw(screen)
     for tower in tower_group:
-        tower.draw(screen)
+        tower.draw(screen, )
     bullet_group.draw(screen)
 
     draw_text(f'Health: {world.health}', text_font, "black", c.SCREEN_WIDTH + 5, 0)
@@ -174,6 +186,10 @@ while run:
                 selected_tower_type = "basic"
             if tower2_button.draw(screen):
                 selected_tower_type = "sniper"
+            if tower3_button.draw(screen):
+                selected_tower_type = "cannon"
+            if tower4_button.draw(screen):
+                selected_tower_type = "freeze"
             if selected_tower_type:
                 tower_cost = TOWER_TYPE_DATA[selected_tower_type].get("cost")
                 draw_text(f'Cost: {tower_cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
