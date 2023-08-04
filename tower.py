@@ -3,8 +3,8 @@ import math
 import pygame as pg
 
 import constants as c
-from tower_data import TOWER_DATA
 from bullet import Bullet, DiffusionBullet
+from tower_data import TOWER_DATA
 
 
 class Tower(pg.sprite.Sprite):
@@ -118,6 +118,7 @@ class EffectTower(Tower):
     def upgrade(self):
         Tower.upgrade(self)
         self.rate = TOWER_DATA[self.tower_type][self.level - 1].get("slow_rate")
+        pg.draw.circle(self.range_image, (102, 179, 255), (self.range, self.range), self.range)
 
     def update(self, enemy_group, bullet_group: pg.sprite.Group, world):
         for enemy in enemy_group:

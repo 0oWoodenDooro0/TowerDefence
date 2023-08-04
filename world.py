@@ -7,7 +7,7 @@ from enemy_data import ENEMY_SPAWN_DATA
 class World:
     def __init__(self, map_image):
         self.game_speed = 1
-        self.level = 1
+        self.level = 0
         self.health = c.HEALTH
         self.money = c.MONEY
         self.tile_map = c.TILE_MAP
@@ -20,7 +20,7 @@ class World:
         self.missed_enemies = 0
 
     def process_enemies(self):
-        enemies = ENEMY_SPAWN_DATA[self.level - 1]
+        enemies = ENEMY_SPAWN_DATA[self.level]
         for enemy_type in enemies:
             enemies_to_spawn = enemies[enemy_type]
             for enemy in range(enemies_to_spawn):

@@ -4,8 +4,9 @@ import constants as c
 from button import Button
 from enemy import Enemy
 from tower import Tower, AttackTower, EffectTower
+from tower_data import TOWER_TYPE_DATA, TOWER_DATA
 from world import World
-from tower_data import TOWER_TYPE_DATA
+from enemy_data import ENEMY_SPAWN_DATA
 
 pg.init()
 
@@ -116,13 +117,13 @@ tower_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
 
 buy_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image, True)
-start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2, start_image, True)
+start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2 + 100, start_image, True)
 sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image, True)
-tower1_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 90, tower1_btn_image, True)
-tower2_button = Button(c.SCREEN_WIDTH + 110, (c.SCREEN_HEIGHT - 30) // 2 + 90, tower2_btn_image, True)
-tower3_button = Button(c.SCREEN_WIDTH + 205, (c.SCREEN_HEIGHT - 30) // 2 + 90, tower3_btn_image, True)
-tower4_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 185, tower4_btn_image, True)
-speed_up_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2, speed_btn_image[0], True)
+tower1_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower1_btn_image, True)
+tower2_button = Button(c.SCREEN_WIDTH + 110, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower2_btn_image, True)
+tower3_button = Button(c.SCREEN_WIDTH + 205, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower3_btn_image, True)
+tower4_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 285, tower4_btn_image, True)
+speed_up_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2 + 100, speed_btn_image[0], True)
 
 run = True
 while run:
@@ -150,17 +151,21 @@ while run:
     bullet_group.draw(screen)
 
     draw_text(f'Health: {world.health}', text_font, "black", c.SCREEN_WIDTH + 5, 0)
-    draw_text(f'Money: {world.money}', text_font, "black", c.SCREEN_WIDTH + 5, 25)
-    draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 50)
+    draw_text(f'Money: {world.money}', text_font, "black", c.SCREEN_WIDTH + 5, 30)
+    draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 60)
 
     if not game_over:
 
         if speed_up_button.draw(screen):
             world.update_speed()
-            speed_up_button.change_image(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2, speed_btn_image[world.game_speed - 1])
+            speed_up_button.change_image(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2 + 100, speed_btn_image[world.game_speed - 1])
 
         if not level_started:
+            draw_text(f'regular: {ENEMY_SPAWN_DATA[world.level].get("regular")}', text_font, "black", c.SCREEN_WIDTH + 5, 350)
+            draw_text(f'fast: {ENEMY_SPAWN_DATA[world.level].get("fast")}', text_font, "black", c.SCREEN_WIDTH + 5, 380)
+            draw_text(f'strong: {ENEMY_SPAWN_DATA[world.level].get("strong")}', text_font, "black", c.SCREEN_WIDTH + 5, 410)
             if start_button.draw(screen):
+                world.level += 1
                 level_started = True
         else:
             if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed:
@@ -174,7 +179,6 @@ while run:
         if world.check_level_completed():
             if world.level < c.MAP_MAX_LEVEL:
                 level_started = False
-                world.level += 1
                 last_enemy_spawn = pg.time.get_ticks()
                 world.reset_level()
                 world.process_enemies()
@@ -191,6 +195,15 @@ while run:
             if tower4_button.draw(screen):
                 selected_tower_type = "freeze"
             if selected_tower_type:
+                draw_text(f'Tower Type: {selected_tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
+                match selected_tower_type:
+                    case "basic" | "sniper" | "cannon":
+                        draw_text(f'damage: {TOWER_DATA[selected_tower_type][0].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(f'attack speed: {1000 / TOWER_DATA[selected_tower_type][0].get("cooldown"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                        draw_text(f'range: {TOWER_DATA[selected_tower_type][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 240)
+                    case "freeze":
+                        draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower_type][0].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(f'range: {TOWER_DATA[selected_tower_type][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
                 tower_cost = TOWER_TYPE_DATA[selected_tower_type].get("cost")
                 draw_text(f'Cost: {tower_cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
                 buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image)
@@ -200,14 +213,40 @@ while run:
                     selected_tile = None
         elif selected_tower:
             selected_tower.selected = True
-
+            draw_text(f'Tower Type: {selected_tower.tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
             if selected_tower.level < c.TOWER_MAX_LEVEL:
                 draw_text(f'Cost: {selected_tower.cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
+                match selected_tower.tower_type:
+                    case "basic" | "sniper" | "cannon":
+                        draw_text(
+                            f'damage: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("damage")}',
+                            text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(
+                            f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range")}',
+                            text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                        draw_text(
+                            f'attack speed: {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("cooldown"):.2f} -> {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("cooldown"):.2f}',
+                            text_font, "black", c.SCREEN_WIDTH + 5, 240)
+                    case "freeze":
+                        draw_text(
+                            f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f} -> {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("slow_rate"):.2f}',
+                            text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(
+                            f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range")}',
+                            text_font, "black", c.SCREEN_WIDTH + 5, 210)
                 buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, upgrade_tower_image)
                 if buy_tower_button.draw(screen) and world.money >= selected_tower.cost:
                     world.money -= selected_tower.cost
                     selected_tower.upgrade()
-
+            else:
+                match selected_tower.tower_type:
+                    case "basic" | "sniper" | "cannon":
+                        draw_text(f'damage: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                        draw_text(f'attack speed: {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("cooldown"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 240)
+                    case "freeze":
+                        draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
             draw_text(f'SELL: {selected_tower.sell}', text_font, "black", c.SCREEN_WIDTH + 170, c.SCREEN_HEIGHT - 110)
             if sell_button.draw(screen):
                 world.money += selected_tower.sell
