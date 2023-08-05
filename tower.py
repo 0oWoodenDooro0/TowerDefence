@@ -113,7 +113,6 @@ class EffectTower(Tower):
 
         self.rect = self.original_image.get_rect()
         self.rect.center = (self.x, self.y)
-        pg.draw.circle(self.range_image, (102, 179, 255), (self.range, self.range), self.range)
 
     def upgrade(self):
         Tower.upgrade(self)

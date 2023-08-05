@@ -118,14 +118,14 @@ enemy_group = pg.sprite.Group()
 tower_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
 
-buy_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image, True)
-start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2 + 100, start_image, True)
-sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image, True)
-tower1_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower1_btn_image, True)
-tower2_button = Button(c.SCREEN_WIDTH + 110, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower2_btn_image, True)
-tower3_button = Button(c.SCREEN_WIDTH + 205, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower3_btn_image, True)
-tower4_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 285, tower4_btn_image, True)
-speed_up_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2 + 100, speed_btn_image[0], True)
+buy_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image, True, False)
+start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2 + 100, start_image, True, False)
+sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image, True, False)
+tower1_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower1_btn_image, True, False)
+tower2_button = Button(c.SCREEN_WIDTH + 110, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower2_btn_image, True, False)
+tower3_button = Button(c.SCREEN_WIDTH + 205, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower3_btn_image, True, False)
+tower4_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 285, tower4_btn_image, True, False)
+speed_up_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2 + 100, speed_btn_image[0], True, False)
 
 run = True
 while run:
@@ -148,8 +148,10 @@ while run:
     world.draw(screen)
 
     enemy_group.draw(screen)
+    for enemy in enemy_group:
+        enemy.health_bar.draw(screen)
     for tower in tower_group:
-        tower.draw(screen, )
+        tower.draw(screen)
     bullet_group.draw(screen)
 
     draw_text(f'Health: {world.health}', text_font, "black", c.SCREEN_WIDTH + 5, 0)
@@ -160,6 +162,7 @@ while run:
 
         if speed_up_button.draw(screen):
             world.update_speed()
+            last_enemy_spawn = (pg.time.get_ticks() - last_enemy_spawn) / world.game_speed + last_enemy_spawn
             speed_up_button.change_image(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2 + 100, speed_btn_image[world.game_speed - 1])
 
         if not level_started:
@@ -253,9 +256,11 @@ while run:
                     case "basic" | "sniper" | "cannon":
                         draw_text(f'damage: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
                         draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
-                        draw_text(f'attack speed: {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("cooldown"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 240)
+                        draw_text(f'attack speed: {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("cooldown"):.2f}', text_font, "black",
+                                  c.SCREEN_WIDTH + 5, 240)
                     case "freeze":
-                        draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5,
+                                  180)
                         draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
             draw_text(f'SELL: {selected_tower.sell}', text_font, "black", c.SCREEN_WIDTH + 170, c.SCREEN_HEIGHT - 110)
             if sell_button.draw(screen):

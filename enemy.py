@@ -4,6 +4,7 @@ import pygame as pg
 from pygame.math import Vector2
 
 from enemy_data import ENEMY_TYPE_DATA
+from health_bar import HealthBar
 
 
 class Enemy(pg.sprite.Sprite):
@@ -28,10 +29,13 @@ class Enemy(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
+        self.health_bar: HealthBar = HealthBar(self.pos.x, self.pos.y, 30, 5, self.health)
+
     def update(self, world):
         self.check_alive(world)
         self.move(world)
         self.rotate()
+        self.health_bar.update(self.pos.x, self.pos.y, self.health)
 
     def move(self, world):
         if self.target_waypoint < len(self.waypoints):

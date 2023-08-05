@@ -45,7 +45,7 @@ TILE_MAP = [0, 0, 0, 0, 181, 181, 181, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 TOWER_TILE_ID = 181
 TOWER_MAX_LEVEL = len(TOWER_DATA["basic"])
-SPAWN_COOLDOWN = 200
+SPAWN_COOLDOWN = 500
 MONEY = 200
 HEALTH = 5
 TOWER_COST = 40
