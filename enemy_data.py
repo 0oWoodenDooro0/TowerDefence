@@ -55,22 +55,22 @@ ENEMY_TYPE_DATA = {
     "regular": {
         "health": 5,
         "speed": 1,
-        "money": 2,
-        "health_level_growth": 5,
+        "money": 10,
+        "health_level_growth": 8,
         "speed_level_growth": 0.2
     },
     "fast": {
         "health": 5,
         "speed": 1,
-        "money": 5,
+        "money": 12,
         "health_level_growth": 5,
         "speed_level_growth": 0.5
     },
     "strong": {
         "health": 5,
         "speed": 1,
-        "money": 8,
-        "health_level_growth": 8,
+        "money": 15,
+        "health_level_growth": 12,
         "speed_level_growth": 0.1
     }
 }

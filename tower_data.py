@@ -139,31 +139,31 @@ TOWER_DATA = {
             "sell": 72
         },
         {
-            "slow_rate": 0.19,
+            "slow_rate": 0.20,
             "range": 149,
             "cost": 70,
             "sell": 110
         },
         {
-            "slow_rate": 0.23,
+            "slow_rate": 0.25,
             "range": 158,
             "cost": 110,
             "sell": 173
         },
         {
-            "slow_rate": 0.27,
+            "slow_rate": 0.30,
             "range": 168,
             "cost": 170,
             "sell": 272
         },
         {
-            "slow_rate": 0.31,
+            "slow_rate": 0.35,
             "range": 168,
             "cost": 270,
             "sell": 425
         },
         {
-            "slow_rate": 0.35,
+            "slow_rate": 0.40,
             "range": 179,
             "cost": -1,
             "sell": 668

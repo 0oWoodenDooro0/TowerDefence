@@ -46,7 +46,9 @@ enemy_images = {
 }
 
 buy_tower_image = pg.image.load('assets/buttons/buy_tower.png').convert_alpha()
+buy_tower_not_enabled_image = pg.image.load('assets/buttons/buy_tower_not_enabled.png').convert_alpha()
 upgrade_tower_image = pg.image.load('assets/buttons/upgrade_tower.png').convert_alpha()
+upgrade_tower_not_enabled_image = pg.image.load('assets/buttons/upgrade_tower_not_enabled.png')
 start_image = pg.image.load('assets/buttons/start.png').convert_alpha()
 sell_image = pg.image.load('assets/buttons/sell.png').convert_alpha()
 tower1_btn_image = pg.image.load('assets/buttons/tower1_btn.png').convert_alpha()
@@ -206,11 +208,15 @@ while run:
                         draw_text(f'range: {TOWER_DATA[selected_tower_type][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
                 tower_cost = TOWER_TYPE_DATA[selected_tower_type].get("cost")
                 draw_text(f'Cost: {tower_cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
-                buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image)
-                if buy_tower_button.draw(screen) and world.money >= tower_cost:
-                    selected_tower = create_tower(selected_tile)
-                    world.money -= tower_cost
-                    selected_tile = None
+                if world.money >= tower_cost:
+                    buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image)
+                    if buy_tower_button.draw(screen):
+                        selected_tower = create_tower(selected_tile)
+                        world.money -= tower_cost
+                        selected_tile = None
+                else:
+                    buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_not_enabled_image)
+                    buy_tower_button.draw(screen)
         elif selected_tower:
             selected_tower.selected = True
             draw_text(f'Tower Type: {selected_tower.tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
@@ -234,10 +240,14 @@ while run:
                         draw_text(
                             f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range")}',
                             text_font, "black", c.SCREEN_WIDTH + 5, 210)
-                buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, upgrade_tower_image)
-                if buy_tower_button.draw(screen) and world.money >= selected_tower.cost:
-                    world.money -= selected_tower.cost
-                    selected_tower.upgrade()
+                if world.money >= selected_tower.cost:
+                    buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, upgrade_tower_image)
+                    if buy_tower_button.draw(screen):
+                        world.money -= selected_tower.cost
+                        selected_tower.upgrade()
+                else:
+                    buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, upgrade_tower_not_enabled_image)
+                    buy_tower_button.draw(screen)
             else:
                 match selected_tower.tower_type:
                     case "basic" | "sniper" | "cannon":
