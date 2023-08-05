@@ -3,7 +3,7 @@ import pygame as pg
 import constants as c
 from button import Button
 from enemy import Enemy
-from tower import Tower, AttackTower, EffectTower
+from tower import Tower, AttackTower, EffectTower, RangeOnlyTower
 from tower_data import TOWER_TYPE_DATA, TOWER_DATA
 from world import World
 from enemy_data import ENEMY_SPAWN_DATA
@@ -68,12 +68,15 @@ bullet_image = pg.image.load('assets/bullet/bullet.png').convert_alpha()
 text_font = pg.font.Font('assets/NotoSansTC-Regular.otf', 24)
 
 
-def create_tower(selected_tile):
-    match selected_tower_type:
-        case "basic" | "sniper" | "cannon":
-            new_tower = AttackTower(tower_images, tower_base_images, selected_tower_type, selected_tile)
-        case "freeze":
-            new_tower = EffectTower(tower_images, tower_base_images, selected_tower_type, selected_tile)
+def create_tower(selected_tile, range_only=False):
+    if range_only:
+        new_tower = RangeOnlyTower(tower_images, tower_base_images, selected_tower_type, selected_tile)
+    else:
+        match selected_tower_type:
+            case "basic" | "sniper" | "cannon":
+                new_tower = AttackTower(tower_images, tower_base_images, selected_tower_type, selected_tile)
+            case "freeze":
+                new_tower = EffectTower(tower_images, tower_base_images, selected_tower_type, selected_tile)
     tower_group.add(new_tower)
     return new_tower
 
@@ -106,6 +109,12 @@ def clear_selection():
         tower.selected = False
 
 
+def clean_range_only_tower():
+    for tower in tower_group:
+        if type(tower) == RangeOnlyTower:
+            tower.kill()
+
+
 def draw_text(text: str, font, text_color, x, y):
     img = font.render(text, True, text_color)
     screen.blit(img, (x, y))
@@ -118,14 +127,14 @@ enemy_group = pg.sprite.Group()
 tower_group = pg.sprite.Group()
 bullet_group = pg.sprite.Group()
 
-buy_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image, True, False)
-start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2 + 100, start_image, True, False)
-sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image, True, False)
-tower1_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower1_btn_image, True, False)
-tower2_button = Button(c.SCREEN_WIDTH + 110, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower2_btn_image, True, False)
-tower3_button = Button(c.SCREEN_WIDTH + 205, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower3_btn_image, True, False)
-tower4_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 285, tower4_btn_image, True, False)
-speed_up_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2 + 100, speed_btn_image[0], True, False)
+buy_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image, True, True)
+start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2 + 100, start_image)
+sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image)
+tower1_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower1_btn_image)
+tower2_button = Button(c.SCREEN_WIDTH + 110, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower2_btn_image)
+tower3_button = Button(c.SCREEN_WIDTH + 205, (c.SCREEN_HEIGHT - 30) // 2 + 190, tower3_btn_image)
+tower4_button = Button(c.SCREEN_WIDTH + 15, (c.SCREEN_HEIGHT - 30) // 2 + 285, tower4_btn_image)
+speed_up_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, (c.SCREEN_HEIGHT - 30) // 2 + 100, speed_btn_image[0])
 
 run = True
 while run:
@@ -193,12 +202,16 @@ while run:
         if selected_tile:
             if tower1_button.draw(screen):
                 selected_tower_type = "basic"
+                selected_tower = create_tower(selected_tile, True)
             if tower2_button.draw(screen):
                 selected_tower_type = "sniper"
+                selected_tower = create_tower(selected_tile, True)
             if tower3_button.draw(screen):
                 selected_tower_type = "cannon"
+                selected_tower = create_tower(selected_tile, True)
             if tower4_button.draw(screen):
                 selected_tower_type = "freeze"
+                selected_tower = create_tower(selected_tile, True)
             if selected_tower_type:
                 draw_text(f'Tower Type: {selected_tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
                 match selected_tower_type:
@@ -213,7 +226,8 @@ while run:
                 draw_text(f'Cost: {tower_cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
                 if world.money >= tower_cost:
                     buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image)
-                    if buy_tower_button.draw(screen):
+                    if buy_tower_button.draw(screen)[0]:
+                        clean_range_only_tower()
                         selected_tower = create_tower(selected_tile)
                         world.money -= tower_cost
                         selected_tile = None
@@ -245,12 +259,21 @@ while run:
                             text_font, "black", c.SCREEN_WIDTH + 5, 210)
                 if world.money >= selected_tower.cost:
                     buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, upgrade_tower_image)
-                    if buy_tower_button.draw(screen):
+                    buy_tower_button_clicked = buy_tower_button.draw(screen)
+                    if buy_tower_button_clicked[0]:
                         world.money -= selected_tower.cost
                         selected_tower.upgrade()
+                    elif buy_tower_button_clicked[1]:
+                        selected_tower.check_range = True
+                    else:
+                        selected_tower.check_range = False
                 else:
                     buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, upgrade_tower_not_enabled_image)
-                    buy_tower_button.draw(screen)
+                    buy_tower_button_clicked = buy_tower_button.draw(screen)
+                    if buy_tower_button_clicked[1]:
+                        selected_tower.check_range = True
+                    else:
+                        selected_tower.check_range = False
             else:
                 match selected_tower.tower_type:
                     case "basic" | "sniper" | "cannon":
@@ -274,6 +297,7 @@ while run:
             run = False
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pg.mouse.get_pos()
+            clean_range_only_tower()
             if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
                 selected_tile = None
                 selected_tower = None

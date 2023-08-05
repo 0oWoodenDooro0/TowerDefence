@@ -18,6 +18,7 @@ class Tower(pg.sprite.Sprite):
 
         self.target = None
         self.selected = False
+        self.check_range = True
 
         self.tile_x = tile_pos[0]
         self.tile_y = tile_pos[1]
@@ -30,8 +31,7 @@ class Tower(pg.sprite.Sprite):
         self.range_image = pg.Surface((self.range * 2, self.range * 2))
         self.range_image.fill((0, 0, 0))
         self.range_image.set_colorkey((0, 0, 0))
-        pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range)
-        self.range_image.set_alpha(100)
+        pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range, width=2)
         self.range_rect = self.range_image.get_rect()
         self.range_rect.center = (self.x, self.y)
 
@@ -44,8 +44,7 @@ class Tower(pg.sprite.Sprite):
         self.range_image = pg.Surface((self.range * 2, self.range * 2))
         self.range_image.fill((0, 0, 0))
         self.range_image.set_colorkey((0, 0, 0))
-        pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range)
-        self.range_image.set_alpha(100)
+        pg.draw.circle(self.range_image, "grey100", (self.range, self.range), self.range, width=2)
         self.range_rect = self.range_image.get_rect()
         self.range_rect.center = (self.x, self.y)
 
@@ -53,6 +52,16 @@ class Tower(pg.sprite.Sprite):
         tower_base_rect = self.tower_base_image.get_rect()
         tower_base_rect.center = (self.x, self.y)
         surface.blit(self.tower_base_image, tower_base_rect)
+
+    def draw_next_range(self):
+        range = TOWER_DATA[self.tower_type][self.level].get("range")
+        range_image = pg.Surface((range * 2, range * 2))
+        range_image.fill((0, 0, 0))
+        range_image.set_colorkey((0, 0, 0))
+        pg.draw.circle(range_image, "grey100", (range, range), range, width=3)
+        range_rect = range_image.get_rect()
+        range_rect.center = (self.x, self.y)
+        return range_image, range_rect
 
 
 class AttackTower(Tower):
@@ -104,6 +113,9 @@ class AttackTower(Tower):
         surface.blit(self.image, self.rect)
         if self.selected:
             surface.blit(self.range_image, self.range_rect)
+            if self.check_range:
+                range_image, range_rect = Tower.draw_next_range(self)
+                surface.blit(range_image, range_rect)
 
 
 class EffectTower(Tower):
@@ -114,10 +126,14 @@ class EffectTower(Tower):
         self.rect = self.original_image.get_rect()
         self.rect.center = (self.x, self.y)
 
+        pg.draw.circle(self.range_image, (102, 179, 255), (self.range, self.range), self.range)
+        self.range_image.set_alpha(100)
+
     def upgrade(self):
         Tower.upgrade(self)
         self.rate = TOWER_DATA[self.tower_type][self.level - 1].get("slow_rate")
         pg.draw.circle(self.range_image, (102, 179, 255), (self.range, self.range), self.range)
+        self.range_image.set_alpha(100)
 
     def update(self, enemy_group, bullet_group: pg.sprite.Group, world):
         for enemy in enemy_group:
@@ -134,3 +150,17 @@ class EffectTower(Tower):
         Tower.draw(self, surface)
         surface.blit(self.original_image, self.rect)
         surface.blit(self.range_image, self.range_rect)
+        if self.check_range and self.selected:
+            range_image, range_rect = Tower.draw_next_range(self)
+            surface.blit(range_image, range_rect)
+
+
+class RangeOnlyTower(Tower):
+    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: str, tile_pos):
+        Tower.__init__(self, tower_images, tower_base_images, tower_type, tile_pos)
+        self.level = 0
+
+    def draw(self, surface):
+        if self.check_range:
+            range_image, range_rect = Tower.draw_next_range(self)
+            surface.blit(range_image, range_rect)
