@@ -4,17 +4,18 @@ import pygame as pg
 
 import constants as c
 from bullet import Bullet, DiffusionBullet
-from tower_data import TOWER_DATA
+from tower_data import TOWER_DATA, TOWER_NAME
 
 
 class Tower(pg.sprite.Sprite):
-    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: str, tile_pos):
+    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: int, tile_pos):
         pg.sprite.Sprite.__init__(self)
         self.level = 1
         self.tower_type = tower_type
-        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range")
-        self.cost = TOWER_DATA[self.tower_type][self.level - 1].get("cost")
-        self.sell = TOWER_DATA[self.tower_type][self.level - 1].get("sell")
+        self.tower_type_name = TOWER_NAME[self.tower_type]
+        self.range = TOWER_DATA[self.tower_type_name][self.level - 1].get("range")
+        self.cost = TOWER_DATA[self.tower_type_name][self.level - 1].get("cost")
+        self.sell = TOWER_DATA[self.tower_type_name][self.level - 1].get("sell")
 
         self.target = None
         self.selected = False
@@ -25,8 +26,8 @@ class Tower(pg.sprite.Sprite):
         self.x = (self.tile_x + 0.5) * c.TILE_SIZE
         self.y = (self.tile_y + 0.5) * c.TILE_SIZE
 
-        self.original_image = tower_images[tower_type]
-        self.tower_base_image = tower_base_images[tower_type]
+        self.original_image = tower_images[self.tower_type_name]
+        self.tower_base_image = tower_base_images[self.tower_type_name]
 
         self.range_image = pg.Surface((self.range * 2, self.range * 2))
         self.range_image.fill((0, 0, 0))
@@ -37,9 +38,9 @@ class Tower(pg.sprite.Sprite):
 
     def upgrade(self):
         self.level += 1
-        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range")
-        self.cost = TOWER_DATA[self.tower_type][self.level - 1].get("cost")
-        self.sell = TOWER_DATA[self.tower_type][self.level - 1].get("sell")
+        self.range = TOWER_DATA[self.tower_type_name][self.level - 1].get("range")
+        self.cost = TOWER_DATA[self.tower_type_name][self.level - 1].get("cost")
+        self.sell = TOWER_DATA[self.tower_type_name][self.level - 1].get("sell")
 
         self.range_image = pg.Surface((self.range * 2, self.range * 2))
         self.range_image.fill((0, 0, 0))
@@ -54,7 +55,8 @@ class Tower(pg.sprite.Sprite):
         surface.blit(self.tower_base_image, tower_base_rect)
 
     def draw_next_range(self):
-        range = TOWER_DATA[self.tower_type][self.level].get("range")
+        if self.level >= c.TOWER_MAX_LEVEL: return None, None
+        range = TOWER_DATA[self.tower_type_name][self.level].get("range")
         range_image = pg.Surface((range * 2, range * 2))
         range_image.fill((0, 0, 0))
         range_image.set_colorkey((0, 0, 0))
@@ -65,10 +67,10 @@ class Tower(pg.sprite.Sprite):
 
 
 class AttackTower(Tower):
-    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: str, tile_pos):
+    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: int, tile_pos):
         Tower.__init__(self, tower_images, tower_base_images, tower_type, tile_pos)
-        self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage")
-        self.cooldown = TOWER_DATA[self.tower_type][self.level - 1].get("cooldown")
+        self.damage = TOWER_DATA[self.tower_type_name][self.level - 1].get("damage")
+        self.cooldown = TOWER_DATA[self.tower_type_name][self.level - 1].get("cooldown")
 
         self.last_shot = pg.time.get_ticks() - self.cooldown
 
@@ -79,17 +81,17 @@ class AttackTower(Tower):
 
     def upgrade(self):
         Tower.upgrade(self)
-        self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage")
-        self.cooldown = TOWER_DATA[self.tower_type][self.level - 1].get("cooldown")
+        self.damage = TOWER_DATA[self.tower_type_name][self.level - 1].get("damage")
+        self.cooldown = TOWER_DATA[self.tower_type_name][self.level - 1].get("cooldown")
 
     def update(self, enemy_group, bullet_group: pg.sprite.Group, world):
         self.pick_target(enemy_group)
         if pg.time.get_ticks() - self.last_shot > self.cooldown / world.game_speed and self.target:
-            match self.tower_type:
+            match self.tower_type_name:
                 case "basic" | "sniper":
-                    new_bullet = Bullet(self.x, self.y, self.target, self.damage, self.tower_type)
+                    new_bullet = Bullet(self.x, self.y, self.target, self.damage, self.tower_type_name)
                 case "cannon":
-                    new_bullet = DiffusionBullet(self.x, self.y, self.target, self.damage, self.tower_type)
+                    new_bullet = DiffusionBullet(self.x, self.y, self.target, self.damage, self.tower_type_name)
             bullet_group.add(new_bullet)
             self.last_shot = pg.time.get_ticks()
         self.target = None
@@ -115,11 +117,12 @@ class AttackTower(Tower):
             surface.blit(self.range_image, self.range_rect)
             if self.check_range:
                 range_image, range_rect = Tower.draw_next_range(self)
-                surface.blit(range_image, range_rect)
+                if range_image and range_rect:
+                    surface.blit(range_image, range_rect)
 
 
 class EffectTower(Tower):
-    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: str, tile_pos):
+    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: int, tile_pos):
         Tower.__init__(self, tower_images, tower_base_images, tower_type, tile_pos)
         self.rate = TOWER_DATA[self.tower_type][self.level - 1].get("slow_rate")
 
@@ -156,7 +159,7 @@ class EffectTower(Tower):
 
 
 class RangeOnlyTower(Tower):
-    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: str, tile_pos):
+    def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: int, tile_pos):
         Tower.__init__(self, tower_images, tower_base_images, tower_type, tile_pos)
         self.level = 0
 

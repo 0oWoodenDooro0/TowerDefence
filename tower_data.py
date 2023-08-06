@@ -195,3 +195,5 @@ TOWER_EFFECTIVENESS = {
         "strong": 0.25
     },
 }
+
+TOWER_NAME = {0: "basic", 1: "sniper", 2: "cannon", 3: "freeze"}
