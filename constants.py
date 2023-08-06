@@ -1,6 +1,3 @@
-from enemy_data import ENEMY_SPAWN_DATA
-from tower_data import TOWER_DATA
-
 ROWS = 15
 COLS = 15
 TILE_SIZE = 64
@@ -44,9 +41,6 @@ TILE_MAP = [0, 0, 0, 0, 181, 181, 181, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 TOWER_TILE_ID = 181
-TOWER_MAX_LEVEL = len(TOWER_DATA["basic"])
 SPAWN_COOLDOWN = 500
 MONEY = 200
 HEALTH = 5
-TOWER_COST = 40
-MAP_MAX_LEVEL = len(ENEMY_SPAWN_DATA)

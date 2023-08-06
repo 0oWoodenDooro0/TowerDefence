@@ -54,7 +54,7 @@ class Tower(pg.sprite.Sprite):
         surface.blit(self.tower_base_image, tower_base_rect)
 
     def draw_next_range(self):
-        if self.level >= c.TOWER_MAX_LEVEL:
+        if self.level >= len(TOWER_DATA[self.tower_type]):
             return None, None
         next_range = TOWER_DATA[self.tower_type][self.level].get("range")
         range_image = pg.Surface((next_range * 2, next_range * 2))

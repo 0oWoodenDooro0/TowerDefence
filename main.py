@@ -194,7 +194,7 @@ while run:
                     last_enemy_spawn = pg.time.get_ticks()
 
         if world.check_level_completed():
-            if world.level < c.MAP_MAX_LEVEL:
+            if world.level < len(ENEMY_SPAWN_DATA):
                 level_started = False
                 last_enemy_spawn = pg.time.get_ticks()
                 world.reset_level()
@@ -233,7 +233,7 @@ while run:
         elif selected_tower:
             selected_tower.selected = True
             draw_text(f'Tower Type: {selected_tower.tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
-            if selected_tower.level < c.TOWER_MAX_LEVEL:
+            if selected_tower.level < len(TOWER_DATA[selected_tower.tower_type]):
                 draw_text(f'Cost: {selected_tower.cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
                 match selected_tower.tower_type:
                     case "basic" | "sniper" | "cannon":
