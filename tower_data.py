@@ -196,4 +196,4 @@ TOWER_EFFECTIVENESS = {
     },
 }
 
-TOWER_NAME = {0: "basic", 1: "sniper", 2: "cannon", 3: "freeze"}
+TOWER_NAME = ["basic", "sniper", "cannon", "freeze"]

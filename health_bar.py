@@ -11,7 +11,8 @@ class HealthBar:
         self.max_hp = max_hp
 
     def draw(self, surface):
-        if self.hp == self.max_hp: return
+        if self.hp == self.max_hp:
+            return
         ratio = self.hp / self.max_hp
         pygame.draw.rect(surface, "red", (self.x - self.w // 2, self.y + 15, self.w, self.h))
         pygame.draw.rect(surface, "green", (self.x - self.w // 2, self.y + 15, self.w * ratio, self.h))

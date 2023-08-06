@@ -3,10 +3,10 @@ import pygame as pg
 import constants as c
 from button import Button
 from enemy import Enemy
+from enemy_data import ENEMY_SPAWN_DATA
 from tower import Tower, AttackTower, EffectTower, RangeOnlyTower
 from tower_data import TOWER_TYPE_DATA, TOWER_DATA, TOWER_NAME
 from world import World
-from enemy_data import ENEMY_SPAWN_DATA
 
 pg.init()
 
@@ -17,10 +17,10 @@ pg.display.set_caption(c.TITLE)
 # game variables
 level_started: bool = False
 game_over: bool = False
-last_enemy_spawn = pg.time.get_ticks()
+last_enemy_spawn: int = pg.time.get_ticks()
 selected_tower: Tower | None = None
 selected_tile: tuple | None = None
-selected_tower_type_index: int | None = None
+selected_tower_type: str | None = None
 
 # load images
 map_image = pg.image.load('assets/level/level1.png').convert_alpha()
@@ -70,52 +70,53 @@ bullet_image = pg.image.load('assets/bullet/bullet.png').convert_alpha()
 text_font = pg.font.Font('assets/NotoSansTC-Regular.otf', 24)
 
 
-def create_tower(selected_tile, range_only=False):
+def create_tower(tile_pos, range_only=False):
     if range_only:
-        new_tower = RangeOnlyTower(tower_images, tower_base_images, selected_tower_type_index, selected_tile)
+        new_tower = RangeOnlyTower(tower_images, tower_base_images, selected_tower_type, tile_pos)
     else:
-        tower_type_name = TOWER_NAME[selected_tower_type_index]
-        match tower_type_name:
+        match selected_tower_type:
             case "basic" | "sniper" | "cannon":
-                new_tower = AttackTower(tower_images, tower_base_images, selected_tower_type_index, selected_tile)
+                new_tower = AttackTower(tower_images, tower_base_images, selected_tower_type, tile_pos)
             case "freeze":
-                new_tower = EffectTower(tower_images, tower_base_images, selected_tower_type_index, selected_tile)
+                new_tower = EffectTower(tower_images, tower_base_images, selected_tower_type, tile_pos)
+            case _:
+                new_tower = None
     tower_group.add(new_tower)
     return new_tower
 
 
-def select_tile(mouse_pos):
-    mouse_tile_x = mouse_pos[0] // c.TILE_SIZE
-    mouse_tile_y = mouse_pos[1] // c.TILE_SIZE
+def select_tile(pos):
+    mouse_tile_x = pos[0] // c.TILE_SIZE
+    mouse_tile_y = pos[1] // c.TILE_SIZE
     mouse_tile_num = (mouse_tile_y * c.COLS) + mouse_tile_x
     if world.tile_map[mouse_tile_num] == world.tower_tile_id:
         space_is_free = True
-        for tower in tower_group:
-            if (mouse_tile_x, mouse_tile_y) == (tower.tile_x, tower.tile_y):
+        for t in tower_group:
+            if (mouse_tile_x, mouse_tile_y) == (t.tile_x, t.tile_y):
                 space_is_free = False
         if space_is_free:
-            return (mouse_tile_x, mouse_tile_y)
+            return mouse_tile_x, mouse_tile_y
     return None
 
 
-def select_tower(mouse_pos):
-    mouse_tile_x = mouse_pos[0] // c.TILE_SIZE
-    mouse_tile_y = mouse_pos[1] // c.TILE_SIZE
-    for tower in tower_group:
-        if (mouse_tile_x, mouse_tile_y) == (tower.tile_x, tower.tile_y):
-            return tower
+def select_tower(pos):
+    mouse_tile_x = pos[0] // c.TILE_SIZE
+    mouse_tile_y = pos[1] // c.TILE_SIZE
+    for t in tower_group:
+        if (mouse_tile_x, mouse_tile_y) == (t.tile_x, t.tile_y):
+            return t
     return None
 
 
 def clear_selection():
-    for tower in tower_group:
-        tower.selected = False
+    for t in tower_group:
+        t.selected = False
 
 
 def clean_range_only_tower():
-    for tower in tower_group:
-        if type(tower) == RangeOnlyTower:
-            tower.kill()
+    for t in tower_group:
+        if type(t) == RangeOnlyTower:
+            t.kill()
 
 
 def draw_text(text: str, font, text_color, x, y):
@@ -204,21 +205,20 @@ while run:
         if selected_tile:
             for i in range(4):
                 if tower_button[i].draw(screen):
-                    selected_tower_type_index = i
+                    selected_tower_type = TOWER_NAME[i]
                     clean_range_only_tower()
                     selected_tower = create_tower(selected_tile, True)
-            if selected_tower_type_index is not None:
-                tower_type_name = TOWER_NAME[selected_tower_type_index]
-                draw_text(f'Tower Type: {tower_type_name}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
-                match tower_type_name:
+            if selected_tower_type is not None:
+                draw_text(f'Tower Type: {selected_tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
+                match selected_tower_type:
                     case "basic" | "sniper" | "cannon":
-                        draw_text(f'damage: {TOWER_DATA[tower_type_name][0].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
-                        draw_text(f'attack speed: {1000 / TOWER_DATA[tower_type_name][0].get("cooldown"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
-                        draw_text(f'range: {TOWER_DATA[tower_type_name][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 240)
+                        draw_text(f'damage: {TOWER_DATA[selected_tower_type][0].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(f'attack speed: {1000 / TOWER_DATA[selected_tower_type][0].get("cooldown"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                        draw_text(f'range: {TOWER_DATA[selected_tower_type][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 240)
                     case "freeze":
-                        draw_text(f'slow_rate: {1 - TOWER_DATA[tower_type_name][0].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
-                        draw_text(f'range: {TOWER_DATA[tower_type_name][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
-                tower_cost = TOWER_TYPE_DATA[tower_type_name].get("cost")
+                        draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower_type][0].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(f'range: {TOWER_DATA[selected_tower_type][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                tower_cost = TOWER_TYPE_DATA[selected_tower_type].get("cost")
                 draw_text(f'Cost: {tower_cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
                 if world.money >= tower_cost:
                     buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image)
@@ -232,27 +232,26 @@ while run:
                     buy_tower_button.draw(screen)
         elif selected_tower:
             selected_tower.selected = True
-            tower_type_name = TOWER_NAME[selected_tower.tower_type]
-            draw_text(f'Tower Type: {tower_type_name}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
+            draw_text(f'Tower Type: {selected_tower.tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
             if selected_tower.level < c.TOWER_MAX_LEVEL:
                 draw_text(f'Cost: {selected_tower.cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
-                match tower_type_name:
+                match selected_tower.tower_type:
                     case "basic" | "sniper" | "cannon":
                         draw_text(
-                            f'damage: {TOWER_DATA[tower_type_name][selected_tower.level - 1].get("damage")} -> {TOWER_DATA[tower_type_name][selected_tower.level].get("damage")}',
+                            f'damage: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("damage")}',
                             text_font, "black", c.SCREEN_WIDTH + 5, 180)
                         draw_text(
-                            f'range: {TOWER_DATA[tower_type_name][selected_tower.level - 1].get("range")} -> {TOWER_DATA[tower_type_name][selected_tower.level].get("range")}',
+                            f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range")}',
                             text_font, "black", c.SCREEN_WIDTH + 5, 210)
                         draw_text(
-                            f'attack speed: {1000 / TOWER_DATA[tower_type_name][selected_tower.level - 1].get("cooldown"):.2f} -> {1000 / TOWER_DATA[tower_type_name][selected_tower.level].get("cooldown"):.2f}',
+                            f'attack speed: {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("cooldown"):.2f} -> {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("cooldown"):.2f}',
                             text_font, "black", c.SCREEN_WIDTH + 5, 240)
                     case "freeze":
                         draw_text(
-                            f'slow_rate: {1 - TOWER_DATA[tower_type_name][selected_tower.level - 1].get("slow_rate"):.2f} -> {1 - TOWER_DATA[tower_type_name][selected_tower.level].get("slow_rate"):.2f}',
+                            f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f} -> {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("slow_rate"):.2f}',
                             text_font, "black", c.SCREEN_WIDTH + 5, 180)
                         draw_text(
-                            f'range: {TOWER_DATA[tower_type_name][selected_tower.level - 1].get("range")} -> {TOWER_DATA[tower_type_name][selected_tower.level].get("range")}',
+                            f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range")}',
                             text_font, "black", c.SCREEN_WIDTH + 5, 210)
                 if world.money >= selected_tower.cost:
                     buy_tower_button.change_image(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, upgrade_tower_image)
@@ -272,16 +271,16 @@ while run:
                     else:
                         selected_tower.check_range = False
             else:
-                match tower_type_name:
+                match selected_tower.tower_type:
                     case "basic" | "sniper" | "cannon":
-                        draw_text(f'damage: {TOWER_DATA[tower_type_name][selected_tower.level - 1].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
-                        draw_text(f'range: {TOWER_DATA[tower_type_name][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
-                        draw_text(f'attack speed: {1000 / TOWER_DATA[tower_type_name][selected_tower.level - 1].get("cooldown"):.2f}', text_font, "black",
+                        draw_text(f'damage: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                        draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                        draw_text(f'attack speed: {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("cooldown"):.2f}', text_font, "black",
                                   c.SCREEN_WIDTH + 5, 240)
                     case "freeze":
-                        draw_text(f'slow_rate: {1 - TOWER_DATA[tower_type_name][selected_tower.level - 1].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5,
+                        draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5,
                                   180)
-                        draw_text(f'range: {TOWER_DATA[tower_type_name][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                        draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
             draw_text(f'SELL: {selected_tower.sell}', text_font, "black", c.SCREEN_WIDTH + 170, c.SCREEN_HEIGHT - 110)
             if sell_button.draw(screen):
                 world.money += selected_tower.sell
@@ -297,7 +296,7 @@ while run:
             if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
                 selected_tile = None
                 selected_tower = None
-                selected_tower_type_index = None
+                selected_tower_type = None
                 clear_selection()
                 clean_range_only_tower()
                 selected_tower = select_tower(mouse_pos)

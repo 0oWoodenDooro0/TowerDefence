@@ -5,7 +5,7 @@ class Button:
     def __init__(self, x, y, image, single_click=True, check_mouse_on=False):
         self.image = image
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        self.rect.top_left = (x, y)
         self.clicked = True
         self.single_click = single_click
         self.check_mouse_on = check_mouse_on
@@ -33,4 +33,4 @@ class Button:
     def change_image(self, x, y, image):
         self.image = image
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        self.rect.top_left = (x, y)

@@ -4,11 +4,11 @@ import pygame as pg
 from pygame import Vector2
 
 from enemy import Enemy
-from tower_data import TOWER_EFFECTIVENESS, TOWER_NAME
+from tower_data import TOWER_EFFECTIVENESS
 
 
 class Bullet(pg.sprite.Sprite):
-    def __init__(self, x, y, target: Enemy, damage: int, tower_type: int, bullet_image='assets/bullet/bullet.png'):
+    def __init__(self, x, y, target: Enemy, damage: int, tower_type: str, bullet_image='assets/bullet/bullet.png'):
         pg.sprite.Sprite.__init__(self)
         self.speed = 15
         self.pos = Vector2(x, y)
@@ -39,7 +39,7 @@ class Bullet(pg.sprite.Sprite):
 
 
 class DiffusionBullet(Bullet):
-    def __init__(self, x, y, target: Enemy, damage: int, tower_type: int):
+    def __init__(self, x, y, target: Enemy, damage: int, tower_type: str):
         Bullet.__init__(self, x, y, target, damage, tower_type, 'assets/bullet/diffusion_bullet.png')
         self.range = 42
 
@@ -59,8 +59,8 @@ class DiffusionBullet(Bullet):
                     y_dist = enemy.pos[1] - self.pos[1]
                     dist = math.sqrt(x_dist ** 2 + y_dist ** 2)
                     if dist < self.range:
-                        enemy.health -= 0.6 * self.damage * TOWER_EFFECTIVENESS[TOWER_NAME[self.tower_type]].get(self.target.enemy_type)
-            self.target.health -= self.damage * TOWER_EFFECTIVENESS[TOWER_NAME[self.tower_type]].get(self.target.enemy_type)
+                        enemy.health -= 0.6 * self.damage * TOWER_EFFECTIVENESS[self.tower_type].get(self.target.enemy_type)
+            self.target.health -= self.damage * TOWER_EFFECTIVENESS[self.tower_type].get(self.target.enemy_type)
 
         if self.collided:
             self.kill()
