@@ -1,19 +1,18 @@
 import random
 
-import constants as c
 from enemy_data import ENEMY_SPAWN_DATA
 
 
 class World:
-    def __init__(self, map_image):
+    def __init__(self, map_image, tile_map, tower_tile_id, waypoints, health, money):
         self.game_speed = 1
         self.level = 0
-        self.health = c.HEALTH
-        self.money = c.MONEY
-        self.tile_map = c.TILE_MAP
-        self.waypoints = c.WAYPOINTS
         self.image = map_image
-        self.tower_tile_id = c.TOWER_TILE_ID
+        self.tile_map = tile_map
+        self.tower_tile_id = tower_tile_id
+        self.waypoints = waypoints
+        self.health = health
+        self.money = money
         self.enemy_list = []
         self.spawned_enemies = 0
         self.killed_enemies = 0
