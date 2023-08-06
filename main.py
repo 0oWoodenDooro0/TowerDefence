@@ -16,7 +16,7 @@ screen = pg.display.set_mode((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
 pg.display.set_caption(c.TITLE)
 
 
-def play_level(map, tile_map, tower_tile_id, waypoints, health, money):
+def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
     # game variables
     level_started: bool = False
     game_over: bool = False
@@ -26,7 +26,7 @@ def play_level(map, tile_map, tower_tile_id, waypoints, health, money):
     selected_tower_type: str | None = None
 
     # load images
-    map_image = pg.image.load(map).convert_alpha()
+    map_image = pg.image.load(map_dir).convert_alpha()
 
     tower_images = {
         "basic": pg.image.load('assets/tower/tower1.png').convert_alpha(),
@@ -66,8 +66,6 @@ def play_level(map, tile_map, tower_tile_id, waypoints, health, money):
         pg.image.load('assets/buttons/speed2x.png').convert_alpha(),
         pg.image.load('assets/buttons/speed3x.png').convert_alpha()
     ]
-
-    bullet_image = pg.image.load('assets/bullet/bullet.png').convert_alpha()
 
     # load font
     text_font = pg.font.Font('assets/NotoSansTC-Regular.otf', 24)
@@ -291,14 +289,14 @@ def play_level(map, tile_map, tower_tile_id, waypoints, health, money):
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pg.mouse.get_pos()
                 if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
-                    selected_tile = None
-                    selected_tower = None
                     selected_tower_type = None
                     clear_selection()
                     clean_range_only_tower()
                     selected_tower = select_tower(mouse_pos)
                     if selected_tower is None:
                         selected_tile = select_tile(mouse_pos)
+                    else:
+                        selected_tile = None
 
         pg.display.flip()
 
