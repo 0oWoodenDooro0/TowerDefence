@@ -53,7 +53,7 @@ class Tower(pg.sprite.Sprite):
         tower_base_rect.center = (self.x, self.y)
         surface.blit(self.tower_base_image, tower_base_rect)
 
-    def draw_next_range(self):
+    def draw_next_range(self, surface):
         if self.level >= len(TOWER_DATA[self.tower_type]):
             return None, None
         next_range = TOWER_DATA[self.tower_type][self.level].get("range")
@@ -63,7 +63,8 @@ class Tower(pg.sprite.Sprite):
         pg.draw.circle(range_image, "grey100", (next_range, next_range), next_range, width=3)
         range_rect = range_image.get_rect()
         range_rect.center = (self.x, self.y)
-        return range_image, range_rect
+        if range_image and range_rect:
+            surface.blit(range_image, range_rect)
 
 
 class AttackTower(Tower):
@@ -125,9 +126,7 @@ class AttackTower(Tower):
         if self.selected:
             surface.blit(self.range_image, self.range_rect)
             if self.check_range:
-                range_image, range_rect = Tower.draw_next_range(self)
-                if range_image and range_rect:
-                    surface.blit(range_image, range_rect)
+                Tower.draw_next_range(self, surface)
 
 
 class EffectTower(Tower):
@@ -163,8 +162,7 @@ class EffectTower(Tower):
         surface.blit(self.original_image, self.rect)
         surface.blit(self.range_image, self.range_rect)
         if self.check_range and self.selected:
-            range_image, range_rect = Tower.draw_next_range(self)
-            surface.blit(range_image, range_rect)
+            Tower.draw_next_range(self, surface)
 
 
 class RangeOnlyTower(Tower):
@@ -174,5 +172,4 @@ class RangeOnlyTower(Tower):
 
     def draw(self, surface):
         if self.check_range:
-            range_image, range_rect = Tower.draw_next_range(self)
-            surface.blit(range_image, range_rect)
+            Tower.draw_next_range(self, surface)

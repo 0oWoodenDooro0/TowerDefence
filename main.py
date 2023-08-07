@@ -173,10 +173,11 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
         draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 60)
 
         if not world.game_over:
-            if game_pause_button.draw(screen):
-                pass
 
-            if speed_up_button.draw(screen):
+            if game_pause_button.draw(screen):
+                world.game_pause = not world.game_pause
+
+            if speed_up_button.draw(screen) and not world.game_pause:
                 world.update_speed()
                 world.last_enemy_spawn = (pg.time.get_ticks() - world.last_enemy_spawn) / world.game_speed + world.last_enemy_spawn
                 speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
@@ -302,6 +303,14 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                     world.money += selected_tower.sell
                     tower_group.remove(selected_tower)
                     selected_tower = None
+
+            if world.game_pause:
+                image = pg.Surface((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
+                image.fill((0, 0, 0))
+                image.set_alpha(100)
+                image_rect = image.get_rect()
+                image_rect.topleft = (0, 0)
+                screen.blit(image, image_rect)
 
         # event
         for event in pg.event.get():
