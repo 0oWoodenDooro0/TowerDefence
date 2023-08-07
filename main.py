@@ -77,7 +77,9 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
         pg.image.load('assets/buttons/speed2x.png').convert_alpha(),
         pg.image.load('assets/buttons/speed3x.png').convert_alpha()
     ]
+    game_pause_image = pg.image.load('assets/buttons/game_pause.png').convert_alpha()
     pause_image = pg.image.load('assets/buttons/pause.png').convert_alpha()
+    resume_image = pg.image.load('assets/buttons/resume.png').convert_alpha()
 
     def create_tower(tile_pos, range_only=False):
         if range_only:
@@ -133,7 +135,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
     buy_tower_button = Button(c.SCREEN_WIDTH + 20, c.SCREEN_HEIGHT - 60, buy_tower_image, True, True)
     start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2 + 100, start_image)
     sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image)
-    pause_button = Button(42, 42, pause_image, center=True)
+    game_pause_button = Button(42, 42, game_pause_image, center=True)
     tower_button = []
 
     for i in range(4):
@@ -147,7 +149,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
 
         # Updating
         world.update()
-        if not world.game_over and not world.game_pause:
+        if not world.game_over and not world.run_pause:
             enemy_group.update(world)
             bullet_group.update(world, enemy_group)
             tower_group.update(enemy_group, bullet_group, world)
@@ -171,11 +173,8 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
         draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 60)
 
         if not world.game_over:
-            if pause_button.draw(screen):
-                world.pause(pg.time.get_ticks())
-                for tower in tower_group:
-                    if type(tower) is AttackTower:
-                        tower.pause(pg.time.get_ticks(), world)
+            if game_pause_button.draw(screen):
+                pass
 
             if speed_up_button.draw(screen):
                 world.update_speed()
@@ -186,13 +185,23 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                 draw_text(f'regular: {ENEMY_SPAWN_DATA[world.level].get("regular")}', text_font, "black", c.SCREEN_WIDTH + 5, 350)
                 draw_text(f'fast: {ENEMY_SPAWN_DATA[world.level].get("fast")}', text_font, "black", c.SCREEN_WIDTH + 5, 380)
                 draw_text(f'strong: {ENEMY_SPAWN_DATA[world.level].get("strong")}', text_font, "black", c.SCREEN_WIDTH + 5, 410)
+                start_button.change_image(start_image)
                 if start_button.draw(screen):
                     world.level += 1
                     level_started = True
             else:
-                if pg.time.get_ticks() - world.last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed and not world.game_pause:
+                if world.run_pause:
+                    start_button.change_image(resume_image)
+                else:
+                    start_button.change_image(pause_image)
+                if start_button.draw(screen):
+                    world.pause(pg.time.get_ticks())
+                    for tower in tower_group:
+                        if type(tower) is AttackTower:
+                            tower.pause(pg.time.get_ticks(), world)
+
+                if pg.time.get_ticks() - world.last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed and not world.run_pause:
                     if world.spawned_enemies < len(world.enemy_list):
-                        print(pg.time.get_ticks() - world.last_enemy_spawn)
                         enemy_type = world.enemy_list[world.spawned_enemies]
                         enemy = Enemy(enemy_type, world.waypoints, enemy_images, world.level)
                         enemy_group.add(enemy)

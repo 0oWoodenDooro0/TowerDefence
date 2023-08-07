@@ -6,6 +6,7 @@ from enemy_data import ENEMY_SPAWN_DATA
 class World:
     def __init__(self, map_image, tile_map, tower_tile_id, waypoints, health, money, last_enemy_spawn):
         self.game_speed = 1
+        self.run_pause = False
         self.game_pause = False
         self.game_over = False
         self.last_enemy_spawn = last_enemy_spawn
@@ -50,8 +51,8 @@ class World:
             self.game_over = True
 
     def pause(self, time: int):
-        self.game_pause = not self.game_pause
-        if self.game_pause:
+        self.run_pause = not self.run_pause
+        if self.run_pause:
             self.elapsed_time = time - self.last_enemy_spawn
         else:
             self.last_enemy_spawn = time - self.elapsed_time

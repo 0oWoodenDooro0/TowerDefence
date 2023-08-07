@@ -111,7 +111,7 @@ class AttackTower(Tower):
                     break
 
     def pause(self, time, world):
-        if world.game_pause:
+        if world.run_pause:
             self.elapsed_time = time - self.last_shot
         else:
             self.last_shot = time - self.elapsed_time
