@@ -73,6 +73,7 @@ class AttackTower(Tower):
         self.cooldown = TOWER_DATA[self.tower_type][self.level - 1].get("cooldown")
 
         self.last_shot = pg.time.get_ticks() - self.cooldown
+        self.elapsed_time = 0
 
         self.angle = 90
         self.image = pg.transform.rotate(self.original_image, self.angle)
@@ -108,6 +109,12 @@ class AttackTower(Tower):
                     self.target = enemy
                     self.angle = math.degrees(math.atan2(-y_dist, x_dist))
                     break
+
+    def pause(self, time, world):
+        if world.game_pause:
+            self.elapsed_time = time - self.last_shot
+        else:
+            self.last_shot = time - self.elapsed_time
 
     def draw(self, surface):
         Tower.draw(self, surface)

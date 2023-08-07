@@ -32,8 +32,6 @@ def draw_text(text: str, font, text_color, x, y, center=False):
 def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
     # game variables
     level_started: bool = False
-    game_over: bool = False
-    last_enemy_spawn: int = pg.time.get_ticks()
     selected_tower: Tower | None = None
     selected_tile: tuple | None = None
     selected_tower_type: str | None = None
@@ -125,7 +123,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
             if type(t) == RangeOnlyTower:
                 t.kill()
 
-    world = World(map_image, tile_map, tower_tile_id, waypoints, health, money)
+    world = World(map_image, tile_map, tower_tile_id, waypoints, health, money, pg.time.get_ticks())
     world.process_enemies()
 
     enemy_group = pg.sprite.Group()
@@ -148,11 +146,8 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
         clock.tick(c.FPS)
 
         # Updating
-        screen.fill("grey100")
-        if not game_over:
-            if world.health <= 0:
-                game_over = True
-
+        world.update()
+        if not world.game_over and not world.game_pause:
             enemy_group.update(world)
             bullet_group.update(world, enemy_group)
             tower_group.update(enemy_group, bullet_group, world)
@@ -160,6 +155,8 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
             if selected_tower:
                 selected_tower.selected = True
         # Drawing
+        screen.fill("grey100")
+
         world.draw(screen)
 
         enemy_group.draw(screen)
@@ -173,10 +170,16 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
         draw_text(f'Money: {world.money}', text_font, "black", c.SCREEN_WIDTH + 5, 30)
         draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 60)
 
-        if not game_over:
+        if not world.game_over:
+            if pause_button.draw(screen):
+                world.pause(pg.time.get_ticks())
+                for tower in tower_group:
+                    if type(tower) is AttackTower:
+                        tower.pause(pg.time.get_ticks(), world)
+
             if speed_up_button.draw(screen):
                 world.update_speed()
-                last_enemy_spawn = (pg.time.get_ticks() - last_enemy_spawn) / world.game_speed + last_enemy_spawn
+                world.last_enemy_spawn = (pg.time.get_ticks() - world.last_enemy_spawn) / world.game_speed + world.last_enemy_spawn
                 speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
 
             if not level_started:
@@ -187,25 +190,23 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                     world.level += 1
                     level_started = True
             else:
-                if pg.time.get_ticks() - last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed:
+                if pg.time.get_ticks() - world.last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed and not world.game_pause:
                     if world.spawned_enemies < len(world.enemy_list):
+                        print(pg.time.get_ticks() - world.last_enemy_spawn)
                         enemy_type = world.enemy_list[world.spawned_enemies]
                         enemy = Enemy(enemy_type, world.waypoints, enemy_images, world.level)
                         enemy_group.add(enemy)
                         world.spawned_enemies += 1
-                        last_enemy_spawn = pg.time.get_ticks()
-
-            if pause_button.draw(screen):
-                pass
+                        world.last_enemy_spawn = pg.time.get_ticks()
 
             if world.check_level_completed():
                 if world.level < len(ENEMY_SPAWN_DATA):
                     level_started = False
-                    last_enemy_spawn = pg.time.get_ticks()
+                    world.last_enemy_spawn = pg.time.get_ticks()
                     world.reset_level()
                     world.process_enemies()
                 else:
-                    game_over = True
+                    world.game_over = True
 
             if selected_tile:
                 for i in range(4):
@@ -364,7 +365,7 @@ def select_level():
         if arrow_back_button.draw(screen):
             run = False
 
-        for i in range(1):
+        for i in range(20):
             x = 252 + (i % 10) * 84
             y = 252 + (i // 10) * 84
             level_button.change_pos(x, y, True)
