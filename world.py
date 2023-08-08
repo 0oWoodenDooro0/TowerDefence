@@ -51,7 +51,6 @@ class World:
             self.game_over = True
 
     def pause(self, time: int):
-        self.run_pause = not self.run_pause
         if self.run_pause:
             self.elapsed_time = time - self.last_enemy_spawn
         else:

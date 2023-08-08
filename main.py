@@ -77,9 +77,18 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
         pg.image.load('assets/buttons/speed2x.png').convert_alpha(),
         pg.image.load('assets/buttons/speed3x.png').convert_alpha()
     ]
-    game_pause_image = pg.image.load('assets/buttons/game_pause.png').convert_alpha()
     pause_image = pg.image.load('assets/buttons/pause.png').convert_alpha()
     resume_image = pg.image.load('assets/buttons/resume.png').convert_alpha()
+    game_pause_image = pg.image.load('assets/buttons/game_pause.png').convert_alpha()
+    game_resume_image = pg.image.load('assets/buttons/game_resume.png').convert_alpha()
+    game_restart_image = pg.image.load('assets/buttons/game_restart.png').convert_alpha()
+    game_end_image = pg.image.load('assets/buttons/game_end.png').convert_alpha()
+
+    pause_mask = pg.Surface((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
+    pause_mask.fill((0, 0, 0))
+    pause_mask.set_alpha(100)
+    pause_mask_rect = pause_mask.get_rect()
+    pause_mask_rect.topleft = (0, 0)
 
     def create_tower(tile_pos, range_only=False):
         if range_only:
@@ -136,6 +145,10 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
     start_button = Button(c.SCREEN_WIDTH + 20, (c.SCREEN_HEIGHT - 30) // 2 + 100, start_image)
     sell_button = Button(c.SCREEN_WIDTH + c.SIDE_PANEL - 140, c.SCREEN_HEIGHT - 60, sell_image)
     game_pause_button = Button(42, 42, game_pause_image, center=True)
+    game_resume_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 700, game_resume_image)
+    game_restart_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 780, game_restart_image)
+    game_end_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 860, game_end_image)
+
     tower_button = []
 
     for i in range(4):
@@ -172,14 +185,14 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
         draw_text(f'Money: {world.money}', text_font, "black", c.SCREEN_WIDTH + 5, 30)
         draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 60)
 
-        if not world.game_over:
+        if game_pause_button.draw(screen) and not world.game_pause:
+            world.game_pause = True
+            world.pause(pg.time.get_ticks())
+            for tower in tower_group:
+                if type(tower) is AttackTower:
+                    tower.pause(pg.time.get_ticks(), world)
 
-            if game_pause_button.draw(screen):
-                world.game_pause = not world.game_pause
-                world.pause(pg.time.get_ticks())
-                for tower in tower_group:
-                    if type(tower) is AttackTower:
-                        tower.pause(pg.time.get_ticks(), world)
+        if not world.game_over:
 
             if speed_up_button.draw(screen) and not world.game_pause:
                 world.update_speed()
@@ -309,19 +322,24 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                     tower_group.remove(selected_tower)
                     selected_tower = None
 
-            if world.game_pause:
-                image = pg.Surface((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
-                image.fill((0, 0, 0))
-                image.set_alpha(100)
-                image_rect = image.get_rect()
-                image_rect.topleft = (0, 0)
-                screen.blit(image, image_rect)
+        if world.game_pause:
+            screen.blit(pause_mask, pause_mask_rect)
+            if game_resume_button.draw(screen):
+                world.game_pause = False
+                world.pause(pg.time.get_ticks())
+                for tower in tower_group:
+                    if type(tower) is AttackTower:
+                        tower.pause(pg.time.get_ticks(), world)
+            if game_restart_button.draw(screen):
+                pass
+            if game_end_button.draw(screen):
+                pass
 
         # event
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
-            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and not world.game_pause:
                 mouse_pos = pg.mouse.get_pos()
                 if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
                     selected_tower_type = None
