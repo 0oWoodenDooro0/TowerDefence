@@ -55,4 +55,7 @@ class World:
         if self.run_pause:
             self.elapsed_time = time - self.last_enemy_spawn
         else:
-            self.last_enemy_spawn = time - self.elapsed_time
+            if self.game_pause:
+                self.elapsed_time = time - self.last_enemy_spawn
+            else:
+                self.last_enemy_spawn = time - self.elapsed_time

@@ -149,7 +149,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
 
         # Updating
         world.update()
-        if not world.game_over and not world.run_pause:
+        if not world.game_over and not world.run_pause and not world.game_pause:
             enemy_group.update(world)
             bullet_group.update(world, enemy_group)
             tower_group.update(enemy_group, bullet_group, world)
@@ -176,6 +176,10 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
 
             if game_pause_button.draw(screen):
                 world.game_pause = not world.game_pause
+                world.pause(pg.time.get_ticks())
+                for tower in tower_group:
+                    if type(tower) is AttackTower:
+                        tower.pause(pg.time.get_ticks(), world)
 
             if speed_up_button.draw(screen) and not world.game_pause:
                 world.update_speed()
@@ -195,13 +199,14 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                     start_button.change_image(resume_image)
                 else:
                     start_button.change_image(pause_image)
-                if start_button.draw(screen):
+                if start_button.draw(screen) and not world.game_pause:
+                    world.run_pause = not world.run_pause
                     world.pause(pg.time.get_ticks())
                     for tower in tower_group:
                         if type(tower) is AttackTower:
                             tower.pause(pg.time.get_ticks(), world)
 
-                if pg.time.get_ticks() - world.last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed and not world.run_pause:
+                if pg.time.get_ticks() - world.last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed and not world.run_pause and not world.game_pause:
                     if world.spawned_enemies < len(world.enemy_list):
                         enemy_type = world.enemy_list[world.spawned_enemies]
                         enemy = Enemy(enemy_type, world.waypoints, enemy_images, world.level)
