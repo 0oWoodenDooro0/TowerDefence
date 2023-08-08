@@ -4,12 +4,12 @@ from enemy_data import ENEMY_SPAWN_DATA
 
 
 class World:
-    def __init__(self, map_image, tile_map, tower_tile_id, waypoints, health, money, last_enemy_spawn):
+    def __init__(self, map_image, tile_map, tower_tile_id, waypoints, health, money, last_enemy_spawn, spawn_cooldown):
         self.game_speed = 1
         self.run_pause = False
         self.game_pause = False
         self.game_over = False
-        self.last_enemy_spawn = last_enemy_spawn
+        self.last_enemy_spawn = last_enemy_spawn - spawn_cooldown
         self.elapsed_time = 0
         self.level = 0
         self.image = map_image
@@ -42,6 +42,22 @@ class World:
         self.killed_enemies = 0
         self.missed_enemies = 0
         self.enemy_list = []
+
+    def restart(self, health, money, spawn_cooldown):
+        self.game_speed = 1
+        self.run_pause = False
+        self.game_pause = False
+        self.game_over = False
+        self.last_enemy_spawn = self.last_enemy_spawn - spawn_cooldown
+        self.elapsed_time = 0
+        self.level = 0
+        self.health = health
+        self.money = money
+        self.enemy_list = []
+        self.spawned_enemies = 0
+        self.killed_enemies = 0
+        self.missed_enemies = 0
+
 
     def update_speed(self):
         self.game_speed = self.game_speed % 3 + 1

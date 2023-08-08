@@ -134,7 +134,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
             if type(t) == RangeOnlyTower:
                 t.kill()
 
-    world = World(map_image, tile_map, tower_tile_id, waypoints, health, money, pg.time.get_ticks())
+    world = World(map_image, tile_map, tower_tile_id, waypoints, health, money, pg.time.get_ticks(), c.SPAWN_COOLDOWN)
     world.process_enemies()
 
     enemy_group = pg.sprite.Group()
@@ -331,9 +331,12 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                     if type(tower) is AttackTower:
                         tower.pause(pg.time.get_ticks(), world)
             if game_restart_button.draw(screen):
-                pass
+                world.restart(c.HEALTH, c.MONEY, c.SPAWN_COOLDOWN)
+                speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
+                enemy_group.empty()
+                tower_group.empty()
             if game_end_button.draw(screen):
-                pass
+                run = False
 
         # event
         for event in pg.event.get():

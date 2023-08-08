@@ -64,7 +64,7 @@ ENEMY_TYPE_DATA = {
         "speed": 1,
         "money": 12,
         "health_level_growth": 5,
-        "speed_level_growth": 0.5
+        "speed_level_growth": 0.3
     },
     "strong": {
         "health": 5,
