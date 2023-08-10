@@ -1,5 +1,5 @@
 import json
-
+import os
 import pygame as pg
 
 import constants as c
@@ -411,6 +411,9 @@ def select_level():
 
     level_button = Button(0, 0, level_image)
     arrow_back_button = Button(100, 100, arrow_back_image, center=True)
+    level_json_data = [x for x in os.listdir('assets/level') if x.endswith(".tmj")]
+    level_map_data = [x for x in os.listdir('assets/level') if x.endswith(".png")]
+    print(level_map_data[0][:-4])
 
     run = True
     while run:
@@ -423,14 +426,14 @@ def select_level():
         if arrow_back_button.draw(screen):
             run = False
 
-        for i in range(1):
+        for i in range(len(level_json_data)):
             x = 252 + (i % 10) * 84
             y = 252 + (i // 10) * 84
             level_button.change_pos(x, y, True)
-            if level_button.draw(screen):
-                with open(f'assets/level/json/level{i + 1}.tmj') as f:
+            if level_button.draw(screen) and level_json_data[i][:-4] == level_map_data[i][:-4]:
+                with open(f'assets/level/{level_json_data[i]}') as f:
                     level_data = json.load(f)
-                    play_level(f'assets/level/map/level{i + 1}.png', c.TOWER_TILE_ID, level_data, c.HEALTH, c.MONEY)
+                    play_level(f'assets/level/{level_map_data[i]}', c.TOWER_TILE_ID, level_data, c.HEALTH, c.MONEY)
             draw_text(str(i + 1), text_font, "grey100", x, y, center=True)
 
         for event in pg.event.get():
