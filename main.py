@@ -84,10 +84,8 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
     game_resume_image = pg.image.load('assets/buttons/game_resume.png').convert_alpha()
     game_restart_image = pg.image.load('assets/buttons/game_restart.png').convert_alpha()
     game_end_image = pg.image.load('assets/buttons/game_end.png').convert_alpha()
-    selected_tile_image = pg.image.load('assets/buttons/selected_tile.png').convert_alpha()
     selected_tower_button_image = pg.image.load('assets/buttons/selected_tower_button.png').convert_alpha()
     selected_tower_image = pg.image.load('assets/buttons/selected_tower.png').convert_alpha()
-    selected_tile_rect = selected_tile_image.get_rect()
     selected_tower_button_rect = selected_tower_button_image.get_rect()
     selected_tower_rect = selected_tower_image.get_rect()
 
@@ -250,8 +248,8 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                         clean_range_only_tower()
                         selected_tower, _ = create_tower(selected_tile, True)
                         selected_tower_pos = (c.SCREEN_WIDTH + (i % 3) * 95 + 55, (c.SCREEN_HEIGHT - 30) // 2 + (i // 3) * 95 + 230)
-                selected_tile_rect.center = ((selected_tile[0] + 0.5) * c.TILE_SIZE, (selected_tile[1] + 0.5) * c.TILE_SIZE)
-                screen.blit(selected_tile_image, selected_tile_rect)
+                selected_tower_rect.center = ((selected_tile[0] + 0.5) * c.TILE_SIZE, (selected_tile[1] + 0.5) * c.TILE_SIZE)
+                screen.blit(selected_tower_image, selected_tower_rect)
                 if selected_tower_type is not None:
                     selected_tower_button_rect.center = selected_tower_pos
                     screen.blit(selected_tower_button_image, selected_tower_button_rect)
