@@ -428,9 +428,9 @@ def select_level():
             y = 252 + (i // 10) * 84
             level_button.change_pos(x, y, True)
             if level_button.draw(screen):
-                with open(f'assets/level/level{i + 1}.tmj') as f:
+                with open(f'assets/level/json/level{i + 1}.tmj') as f:
                     level_data = json.load(f)
-                    play_level(f'assets/level/level{i + 1}.png', c.TOWER_TILE_ID, level_data, c.HEALTH, c.MONEY)
+                    play_level(f'assets/level/map/level{i + 1}.png', c.TOWER_TILE_ID, level_data, c.HEALTH, c.MONEY)
             draw_text(str(i + 1), text_font, "grey100", x, y, center=True)
 
         for event in pg.event.get():
