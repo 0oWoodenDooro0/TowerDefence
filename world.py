@@ -4,7 +4,7 @@ from enemy_data import ENEMY_SPAWN_DATA
 
 
 class World:
-    def __init__(self, map_image, tile_map, tower_tile_id, waypoints, health, money, last_enemy_spawn, spawn_cooldown):
+    def __init__(self, map_image, tower_tile_id, data, health, money, last_enemy_spawn, spawn_cooldown):
         self.game_speed = 1
         self.run_pause = False
         self.game_pause = False
@@ -13,15 +13,32 @@ class World:
         self.elapsed_time = 0
         self.level = 0
         self.image = map_image
-        self.tile_map = tile_map
         self.tower_tile_id = tower_tile_id
-        self.waypoints = waypoints
+        self.tile_map = []
+        self.waypoints = []
+        self.level_data = data
         self.health = health
         self.money = money
         self.enemy_list = []
         self.spawned_enemies = 0
         self.killed_enemies = 0
         self.missed_enemies = 0
+        self.process_data()
+
+    def process_data(self):
+        for layer in self.level_data["layers"]:
+            match layer["name"]:
+                case "waypoints":
+                    waypoints = layer["objects"][0]["polyline"]
+                    self.process_waypoints(waypoints)
+                case "tower":
+                    self.tile_map = layer["data"]
+
+    def process_waypoints(self, data):
+        for point in data:
+            x = point["x"]
+            y = point["y"]
+            self.waypoints.append((x, y))
 
     def process_enemies(self):
         enemies = ENEMY_SPAWN_DATA[self.level]

@@ -1,3 +1,5 @@
+import json
+
 import pygame as pg
 
 import constants as c
@@ -29,7 +31,7 @@ def draw_text(text: str, font, text_color, x, y, center=False):
         screen.blit(img, (x, y))
 
 
-def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
+def play_level(map_dir, tower_tile_id, waypoints, health, money):
     # game variables
     level_started: bool = False
     selected_tower: Tower | None = None
@@ -139,7 +141,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
             if type(t) == RangeOnlyTower:
                 t.kill()
 
-    world = World(map_image, tile_map, tower_tile_id, waypoints, health, money, pg.time.get_ticks(), c.SPAWN_COOLDOWN)
+    world = World(map_image, tower_tile_id, waypoints, health, money, pg.time.get_ticks(), c.SPAWN_COOLDOWN)
     world.process_enemies()
 
     enemy_group = pg.sprite.Group()
@@ -421,12 +423,14 @@ def select_level():
         if arrow_back_button.draw(screen):
             run = False
 
-        for i in range(20):
+        for i in range(1):
             x = 252 + (i % 10) * 84
             y = 252 + (i // 10) * 84
             level_button.change_pos(x, y, True)
             if level_button.draw(screen):
-                play_level('assets/level/level1.png', c.TILE_MAP, c.TOWER_TILE_ID, c.WAYPOINTS, c.HEALTH, c.MONEY)
+                with open(f'assets/level/level{i + 1}.tmj') as f:
+                    level_data = json.load(f)
+                    play_level(f'assets/level/level{i + 1}.png', c.TOWER_TILE_ID, level_data, c.HEALTH, c.MONEY)
             draw_text(str(i + 1), text_font, "grey100", x, y, center=True)
 
         for event in pg.event.get():
