@@ -35,7 +35,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
     selected_tower: Tower | None = None
     selected_tile: tuple | None = None
     selected_tower_type: str | None = None
-    selected_tower_button_pos: tuple | None = None
+    selected_tower_pos: tuple | None = None
 
     # load images
     map_image = pg.image.load(map_dir).convert_alpha()
@@ -247,11 +247,11 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                         selected_tower_type = TOWER_NAME[i]
                         clean_range_only_tower()
                         selected_tower = create_tower(selected_tile, True)
-                        selected_tower_button_pos = (c.SCREEN_WIDTH + (i % 3) * 95 + 55, (c.SCREEN_HEIGHT - 30) // 2 + (i // 3) * 95 + 230)
+                        selected_tower_pos = (c.SCREEN_WIDTH + (i % 3) * 95 + 55, (c.SCREEN_HEIGHT - 30) // 2 + (i // 3) * 95 + 230)
                 selected_tile_rect.center = ((selected_tile[0] + 0.5) * c.TILE_SIZE, (selected_tile[1] + 0.5) * c.TILE_SIZE)
                 screen.blit(selected_tile_image, selected_tile_rect)
                 if selected_tower_type is not None:
-                    selected_tower_rect.center = selected_tower_button_pos
+                    selected_tower_rect.center = selected_tower_pos
                     screen.blit(selected_tower_image, selected_tower_rect)
                     draw_text(f'Tower Type: {selected_tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
                     match selected_tower_type:
