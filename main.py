@@ -85,8 +85,10 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
     game_restart_image = pg.image.load('assets/buttons/game_restart.png').convert_alpha()
     game_end_image = pg.image.load('assets/buttons/game_end.png').convert_alpha()
     selected_tile_image = pg.image.load('assets/buttons/selected_tile.png').convert_alpha()
+    selected_tower_button_image = pg.image.load('assets/buttons/selected_tower_button.png').convert_alpha()
     selected_tower_image = pg.image.load('assets/buttons/selected_tower.png').convert_alpha()
     selected_tile_rect = selected_tile_image.get_rect()
+    selected_tower_button_rect = selected_tower_button_image.get_rect()
     selected_tower_rect = selected_tower_image.get_rect()
 
     pause_mask = pg.Surface((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
@@ -107,7 +109,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                 case _:
                     new_tower = None
         tower_group.add(new_tower)
-        return new_tower
+        return new_tower, tile_pos
 
     def select_tile(pos):
         mouse_tile_x = pos[0] // c.TILE_SIZE
@@ -127,8 +129,8 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
         mouse_tile_y = pos[1] // c.TILE_SIZE
         for t in tower_group:
             if (mouse_tile_x, mouse_tile_y) == (t.tile_x, t.tile_y):
-                return t
-        return None
+                return t, (mouse_tile_x, mouse_tile_y)
+        return None, None
 
     def clear_selection():
         for t in tower_group:
@@ -246,13 +248,13 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                     if tower_button[i].draw(screen):
                         selected_tower_type = TOWER_NAME[i]
                         clean_range_only_tower()
-                        selected_tower = create_tower(selected_tile, True)
+                        selected_tower, _ = create_tower(selected_tile, True)
                         selected_tower_pos = (c.SCREEN_WIDTH + (i % 3) * 95 + 55, (c.SCREEN_HEIGHT - 30) // 2 + (i // 3) * 95 + 230)
                 selected_tile_rect.center = ((selected_tile[0] + 0.5) * c.TILE_SIZE, (selected_tile[1] + 0.5) * c.TILE_SIZE)
                 screen.blit(selected_tile_image, selected_tile_rect)
                 if selected_tower_type is not None:
-                    selected_tower_rect.center = selected_tower_pos
-                    screen.blit(selected_tower_image, selected_tower_rect)
+                    selected_tower_button_rect.center = selected_tower_pos
+                    screen.blit(selected_tower_button_image, selected_tower_button_rect)
                     draw_text(f'Tower Type: {selected_tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
                     match selected_tower_type:
                         case "basic" | "sniper" | "cannon":
@@ -268,7 +270,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                         buy_tower_button.change_image(buy_tower_image)
                         if buy_tower_button.draw(screen)[0]:
                             clean_range_only_tower()
-                            selected_tower = create_tower(selected_tile)
+                            selected_tower, selected_tower_pos = create_tower(selected_tile)
                             world.money -= tower_cost
                             selected_tile = None
                     else:
@@ -276,6 +278,8 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                         buy_tower_button.draw(screen)
             elif selected_tower:
                 selected_tower.selected = True
+                selected_tower_rect.center = ((selected_tower_pos[0] + 0.5) * c.TILE_SIZE, (selected_tower_pos[1] + 0.5) * c.TILE_SIZE)
+                screen.blit(selected_tower_image, selected_tower_rect)
                 draw_text(f'Tower Type: {selected_tower.tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
                 if selected_tower.level < len(TOWER_DATA[selected_tower.tower_type]):
                     draw_text(f'Cost: {selected_tower.cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
@@ -358,7 +362,7 @@ def play_level(map_dir, tile_map, tower_tile_id, waypoints, health, money):
                     selected_tower_type = None
                     clear_selection()
                     clean_range_only_tower()
-                    selected_tower = select_tower(mouse_pos)
+                    selected_tower, selected_tower_pos = select_tower(mouse_pos)
                     if selected_tower is None:
                         selected_tile = select_tile(mouse_pos)
                     else:
