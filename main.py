@@ -31,7 +31,7 @@ def draw_text(text: str, font, text_color, x, y, center=False):
         screen.blit(img, (x, y))
 
 
-def play_level(map_dir, tower_tile_id, waypoints, health, money):
+def play_level(map_dir, level_data, health, money):
     # game variables
     level_started: bool = False
     selected_tower: Tower | None = None
@@ -115,13 +115,14 @@ def play_level(map_dir, tower_tile_id, waypoints, health, money):
         mouse_tile_x = pos[0] // c.TILE_SIZE
         mouse_tile_y = pos[1] // c.TILE_SIZE
         mouse_tile_num = (mouse_tile_y * c.COLS) + mouse_tile_x
-        if world.tile_map[mouse_tile_num] == world.tower_tile_id:
-            space_is_free = True
-            for t in tower_group:
-                if (mouse_tile_x, mouse_tile_y) == (t.tile_x, t.tile_y):
-                    space_is_free = False
-            if space_is_free:
-                return mouse_tile_x, mouse_tile_y
+        for tower_id in world.tower_tile_id:
+            if world.tile_map[mouse_tile_num] == tower_id:
+                space_is_free = True
+                for t in tower_group:
+                    if (mouse_tile_x, mouse_tile_y) == (t.tile_x, t.tile_y):
+                        space_is_free = False
+                if space_is_free:
+                    return mouse_tile_x, mouse_tile_y
         return None
 
     def select_tower(pos):
@@ -141,7 +142,7 @@ def play_level(map_dir, tower_tile_id, waypoints, health, money):
             if type(t) == RangeOnlyTower:
                 t.kill()
 
-    world = World(map_image, tower_tile_id, waypoints, health, money, pg.time.get_ticks(), c.SPAWN_COOLDOWN)
+    world = World(map_image, level_data, health, money, pg.time.get_ticks(), c.SPAWN_COOLDOWN)
     world.process_enemies()
 
     enemy_group = pg.sprite.Group()
@@ -413,7 +414,6 @@ def select_level():
     arrow_back_button = Button(100, 100, arrow_back_image, center=True)
     level_json_data = [x for x in os.listdir('assets/level') if x.endswith(".tmj")]
     level_map_data = [x for x in os.listdir('assets/level') if x.endswith(".png")]
-    print(level_map_data[0][:-4])
 
     run = True
     while run:
@@ -433,7 +433,7 @@ def select_level():
             if level_button.draw(screen) and level_json_data[i][:-4] == level_map_data[i][:-4]:
                 with open(f'assets/level/{level_json_data[i]}') as f:
                     level_data = json.load(f)
-                    play_level(f'assets/level/{level_map_data[i]}', c.TOWER_TILE_ID, level_data, c.HEALTH, c.MONEY)
+                    play_level(f'assets/level/{level_map_data[i]}', level_data, c.HEALTH, c.MONEY)
             draw_text(str(i + 1), text_font, "grey100", x, y, center=True)
 
         for event in pg.event.get():

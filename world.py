@@ -4,7 +4,7 @@ from enemy_data import ENEMY_SPAWN_DATA
 
 
 class World:
-    def __init__(self, map_image, tower_tile_id, data, health, money, last_enemy_spawn, spawn_cooldown):
+    def __init__(self, map_image, data, health, money, last_enemy_spawn, spawn_cooldown):
         self.game_speed = 1
         self.run_pause = False
         self.game_pause = False
@@ -13,7 +13,7 @@ class World:
         self.elapsed_time = 0
         self.level = 0
         self.image = map_image
-        self.tower_tile_id = tower_tile_id
+        self.tower_tile_id = []
         self.tile_map = []
         self.waypoints = []
         self.level_data = data
@@ -33,6 +33,8 @@ class World:
                     self.process_waypoints(waypoints)
                 case "tower":
                     self.tile_map = layer["data"]
+                    tower_tile_set = set(x for x in self.tile_map if x != 0)
+                    self.tower_tile_id = list(tower_tile_set)
 
     def process_waypoints(self, data):
         for point in data:
@@ -74,7 +76,6 @@ class World:
         self.spawned_enemies = 0
         self.killed_enemies = 0
         self.missed_enemies = 0
-
 
     def update_speed(self):
         self.game_speed = self.game_speed % 3 + 1
