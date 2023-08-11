@@ -71,7 +71,8 @@ class AttackTower(Tower):
     def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: str, tile_pos):
         Tower.__init__(self, tower_images, tower_base_images, tower_type, tile_pos)
         self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage")
-        self.cooldown = TOWER_DATA[self.tower_type][self.level - 1].get("cooldown")
+        self.atk_speed = TOWER_DATA[self.tower_type][self.level - 1].get("atk_speed")
+        self.cooldown = int(1000 / self.atk_speed)
 
         self.last_shot = pg.time.get_ticks() - self.cooldown
         self.elapsed_time = 0
@@ -84,7 +85,8 @@ class AttackTower(Tower):
     def upgrade(self):
         Tower.upgrade(self)
         self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage")
-        self.cooldown = TOWER_DATA[self.tower_type][self.level - 1].get("cooldown")
+        self.atk_speed = TOWER_DATA[self.tower_type][self.level - 1].get("atk_speed")
+        self.cooldown = int(1000 / self.atk_speed)
 
     def update(self, enemy_group, bullet_group: pg.sprite.Group, world):
         self.pick_target(enemy_group)

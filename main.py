@@ -278,7 +278,7 @@ def play_level(map_dir, level_data, health, money, level, coin):
                     match selected_tower_type:
                         case "basic" | "sniper" | "cannon":
                             draw_text(f'damage: {TOWER_DATA[selected_tower_type][0].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
-                            draw_text(f'attack speed: {1000 / TOWER_DATA[selected_tower_type][0].get("cooldown"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                            draw_text(f'attack speed: {TOWER_DATA[selected_tower_type][0].get("atk_speed"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
                             draw_text(f'range: {TOWER_DATA[selected_tower_type][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 240)
                         case "freeze":
                             draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower_type][0].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
@@ -311,7 +311,7 @@ def play_level(map_dir, level_data, health, money, level, coin):
                                 f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range")}',
                                 text_font, "black", c.SCREEN_WIDTH + 5, 210)
                             draw_text(
-                                f'attack speed: {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("cooldown"):.2f} -> {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("cooldown"):.2f}',
+                                f'attack speed: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("atk_speed")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("atk_speed")}',
                                 text_font, "black", c.SCREEN_WIDTH + 5, 240)
                         case "freeze":
                             draw_text(

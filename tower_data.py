@@ -3,42 +3,42 @@ TOWER_DATA = {
         {
             "damage": 7.5,
             "range": 140,
-            "cooldown": 800,
+            "atk_speed": 1.25,
             "cost": 20,
             "sell": 43
         },
         {
             "damage": 9.4,
             "range": 154,
-            "cooldown": 710,
+            "atk_speed": 1.4,
             "cost": 26,
             "sell": 61
         },
         {
             "damage": 11.8,
             "range": 161,
-            "cooldown": 710,
+            "atk_speed": 1.4,
             "cost": 42,
             "sell": 85
         },
         {
             "damage": 14.5,
             "range": 161,
-            "cooldown": 660,
+            "atk_speed": 1.55,
             "cost": 61,
             "sell": 122
         },
         {
             "damage": 18,
             "range": 175,
-            "cooldown": 590,
+            "atk_speed": 1.55,
             "cost": 90,
             "sell": 177
         },
         {
             "damage": 23,
             "range": 175,
-            "cooldown": 590,
+            "atk_speed": 1.7,
             "cost": -1,
             "sell": 258
         }
@@ -47,42 +47,42 @@ TOWER_DATA = {
         {
             "damage": 46,
             "range": 315,
-            "cooldown": 3550,
+            "atk_speed": 0.28,
             "cost": 42,
             "sell": 72
         },
         {
             "damage": 64,
             "range": 343,
-            "cooldown": 3150,
+            "atk_speed": 0.32,
             "cost": 72,
             "sell": 110
         },
         {
             "damage": 84,
             "range": 371,
-            "cooldown": 2650,
+            "atk_speed": 0.38,
             "cost": 110,
             "sell": 175
         },
         {
             "damage": 128,
             "range": 371,
-            "cooldown": 2650,
+            "atk_speed": 0.38,
             "cost": 176,
             "sell": 274
         },
         {
             "damage": 180,
             "range": 399,
-            "cooldown": 2250,
+            "atk_speed": 0.44,
             "cost": 380,
             "sell": 432
         },
         {
             "damage": 250,
             "range": 427,
-            "cooldown": 2200,
+            "atk_speed": 0.5,
             "cost": -1,
             "sell": 774
         }
@@ -91,42 +91,42 @@ TOWER_DATA = {
         {
             "damage": 14,
             "range": 119,
-            "cooldown": 1650,
+            "atk_speed": 0.6,
             "cost": 42,
             "sell": 54
         },
         {
             "damage": 22.7,
             "range": 133,
-            "cooldown": 1400,
+            "atk_speed": 0.7,
             "cost": 63,
             "sell": 92
         },
         {
             "damage": 30.2,
             "range": 140,
-            "cooldown": 1400,
+            "atk_speed": 0.7,
             "cost": 115,
             "sell": 149
         },
         {
             "damage": 39.8,
             "range": 150,
-            "cooldown": 1170,
+            "atk_speed": 0.85,
             "cost": 210,
             "sell": 252
         },
         {
             "damage": 52.9,
             "range": 150,
-            "cooldown": 1000,
+            "atk_speed": 1,
             "cost": 300,
             "sell": 441
         },
         {
             "damage": 68,
             "range": 161,
-            "cooldown": 900,
+            "atk_speed": 1.1,
             "cost": -1,
             "sell": 711
         }
