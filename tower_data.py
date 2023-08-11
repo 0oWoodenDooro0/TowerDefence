@@ -4,6 +4,7 @@ TOWER_DATA = {
             "damage": 7.5,
             "range": 140,
             "atk_speed": 1.25,
+            "rotate_speed": 90,
             "cost": 20,
             "sell": 43
         },
@@ -11,6 +12,7 @@ TOWER_DATA = {
             "damage": 9.4,
             "range": 154,
             "atk_speed": 1.4,
+            "rotate_speed": 90,
             "cost": 26,
             "sell": 61
         },
@@ -18,6 +20,7 @@ TOWER_DATA = {
             "damage": 11.8,
             "range": 161,
             "atk_speed": 1.4,
+            "rotate_speed": 110,
             "cost": 42,
             "sell": 85
         },
@@ -25,6 +28,7 @@ TOWER_DATA = {
             "damage": 14.5,
             "range": 161,
             "atk_speed": 1.55,
+            "rotate_speed": 120,
             "cost": 61,
             "sell": 122
         },
@@ -32,6 +36,7 @@ TOWER_DATA = {
             "damage": 18,
             "range": 175,
             "atk_speed": 1.55,
+            "rotate_speed": 120,
             "cost": 90,
             "sell": 177
         },
@@ -39,6 +44,7 @@ TOWER_DATA = {
             "damage": 23,
             "range": 175,
             "atk_speed": 1.7,
+            "rotate_speed": 135,
             "cost": -1,
             "sell": 258
         }
@@ -48,6 +54,7 @@ TOWER_DATA = {
             "damage": 46,
             "range": 315,
             "atk_speed": 0.28,
+            "rotate_speed": 50,
             "cost": 42,
             "sell": 72
         },
@@ -55,6 +62,7 @@ TOWER_DATA = {
             "damage": 64,
             "range": 343,
             "atk_speed": 0.32,
+            "rotate_speed": 55,
             "cost": 72,
             "sell": 110
         },
@@ -62,6 +70,7 @@ TOWER_DATA = {
             "damage": 84,
             "range": 371,
             "atk_speed": 0.38,
+            "rotate_speed": 60,
             "cost": 110,
             "sell": 175
         },
@@ -69,6 +78,7 @@ TOWER_DATA = {
             "damage": 128,
             "range": 371,
             "atk_speed": 0.38,
+            "rotate_speed": 64,
             "cost": 176,
             "sell": 274
         },
@@ -76,6 +86,7 @@ TOWER_DATA = {
             "damage": 180,
             "range": 399,
             "atk_speed": 0.44,
+            "rotate_speed": 73,
             "cost": 380,
             "sell": 432
         },
@@ -83,6 +94,7 @@ TOWER_DATA = {
             "damage": 250,
             "range": 427,
             "atk_speed": 0.5,
+            "rotate_speed": 73,
             "cost": -1,
             "sell": 774
         }
@@ -92,6 +104,7 @@ TOWER_DATA = {
             "damage": 14,
             "range": 119,
             "atk_speed": 0.6,
+            "rotate_speed": 40,
             "cost": 42,
             "sell": 54
         },
@@ -99,6 +112,7 @@ TOWER_DATA = {
             "damage": 22.7,
             "range": 133,
             "atk_speed": 0.7,
+            "rotate_speed": 50,
             "cost": 63,
             "sell": 92
         },
@@ -106,6 +120,7 @@ TOWER_DATA = {
             "damage": 30.2,
             "range": 140,
             "atk_speed": 0.7,
+            "rotate_speed": 60,
             "cost": 115,
             "sell": 149
         },
@@ -113,6 +128,7 @@ TOWER_DATA = {
             "damage": 39.8,
             "range": 150,
             "atk_speed": 0.85,
+            "rotate_speed": 70,
             "cost": 210,
             "sell": 252
         },
@@ -120,6 +136,7 @@ TOWER_DATA = {
             "damage": 52.9,
             "range": 150,
             "atk_speed": 1,
+            "rotate_speed": 80,
             "cost": 300,
             "sell": 441
         },
@@ -127,6 +144,7 @@ TOWER_DATA = {
             "damage": 68,
             "range": 161,
             "atk_speed": 1.1,
+            "rotate_speed": 80,
             "cost": -1,
             "sell": 711
         }

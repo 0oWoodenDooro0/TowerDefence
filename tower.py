@@ -5,6 +5,7 @@ import pygame as pg
 import constants as c
 from bullet import Bullet, DiffusionBullet
 from tower_data import TOWER_DATA
+from world import World
 
 
 class Tower(pg.sprite.Sprite):
@@ -72,6 +73,7 @@ class AttackTower(Tower):
         Tower.__init__(self, tower_images, tower_base_images, tower_type, tile_pos)
         self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage")
         self.atk_speed = TOWER_DATA[self.tower_type][self.level - 1].get("atk_speed")
+        self.rotate_speed = TOWER_DATA[self.tower_type][self.level - 1].get("rotate_speed")
         self.cooldown = int(1000 / self.atk_speed)
 
         self.last_shot = pg.time.get_ticks() - self.cooldown
@@ -86,11 +88,12 @@ class AttackTower(Tower):
         Tower.upgrade(self)
         self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage")
         self.atk_speed = TOWER_DATA[self.tower_type][self.level - 1].get("atk_speed")
+        self.rotate_speed = TOWER_DATA[self.tower_type][self.level - 1].get("rotate_speed")
         self.cooldown = int(1000 / self.atk_speed)
 
-    def update(self, enemy_group, bullet_group: pg.sprite.Group, world):
-        self.pick_target(enemy_group)
-        if pg.time.get_ticks() - self.last_shot > self.cooldown / world.game_speed and self.target:
+    def update(self, enemy_group: pg.sprite.Group, bullet_group: pg.sprite.Group, world: World):
+        shoot = self.pick_target(enemy_group, world)
+        if pg.time.get_ticks() - self.last_shot > self.cooldown / world.game_speed and self.target and shoot:
             match self.tower_type:
                 case "basic" | "sniper":
                     new_bullet = Bullet(self.x, self.y, self.target, self.damage, self.tower_type)
@@ -102,7 +105,7 @@ class AttackTower(Tower):
             self.last_shot = pg.time.get_ticks()
         self.target = None
 
-    def pick_target(self, enemy_group):
+    def pick_target(self, enemy_group: pg.sprite.Group, world: World):
         for enemy in enemy_group:
             if enemy.health > 0:
                 x_dist = enemy.pos[0] - self.x
@@ -110,8 +113,26 @@ class AttackTower(Tower):
                 dist = math.sqrt(x_dist ** 2 + y_dist ** 2)
                 if dist < self.range:
                     self.target = enemy
-                    self.angle = math.degrees(math.atan2(-y_dist, x_dist))
-                    break
+                    angle = math.degrees(math.atan2(-y_dist, x_dist))
+                    diff = self.angle - angle
+                    if diff < -180:
+                        diff += 360
+                    elif diff > 180:
+                        diff -= 360
+                    degree = self.rotate_speed * world.game_speed / c.FPS
+                    if abs(diff) > degree:
+                        if diff > 0:
+                            self.angle -= degree
+                        else:
+                            self.angle += degree
+                        if self.angle > 180:
+                            self.angle -= 360
+                        elif self.angle < -180:
+                            self.angle += 360
+                    else:
+                        self.angle = angle
+                        return True
+                    return False
 
     def pause(self, time, world):
         if world.run_pause:

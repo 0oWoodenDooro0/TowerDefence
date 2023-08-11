@@ -50,9 +50,9 @@ class World:
 
     def process_enemies(self):
         enemy_type = random.choice(ENEMY_SPAWN_TYPE_DATA)
-        num_of_spawn = random.randint(min(30, 2 + self.wave * 2), min(40, 7 + self.wave * 2))
-        if enemy_type == "regular":
-            num_of_spawn = int(num_of_spawn * 1.2)
+        num_of_spawn = random.randint(min(30, self.wave), min(40, 5 + self.wave))
+        if enemy_type != "regular":
+            num_of_spawn = int(num_of_spawn * 0.8)
         for i in range(num_of_spawn):
             self.enemy_list.append(enemy_type)
         self.next_wave_enemies_type = enemy_type

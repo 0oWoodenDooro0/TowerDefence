@@ -9,19 +9,19 @@ ENEMY_TYPE_DATA = {
         "health": 5,
         "speed": 2,
         "money": 2,
-        "health_wave_growth": 5
+        "health_wave_growth": 2
     },
     "fast": {
         "health": 5,
         "speed": 2.5,
-        "money": 5,
-        "health_wave_growth": 5
+        "money": 3,
+        "health_wave_growth": 2
     },
     "strong": {
         "health": 5,
         "speed": 2,
         "money": 5,
-        "health_wave_growth": 10
+        "health_wave_growth": 5
     }
 }
 
