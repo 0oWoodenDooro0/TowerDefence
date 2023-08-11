@@ -170,6 +170,20 @@ def play_level(map_dir, level_data, health, money, level, coin):
             if type(t) is AttackTower:
                 t.pause(pg.time.get_ticks(), world)
 
+    def save_data():
+        with open('assets/data.json', 'w') as f:
+            js = json.dumps({"coin": coin})
+            f.write(js)
+
+    def restart(coin):
+        coin += world.reward
+        world.reward = 0
+        save_data()
+        world.restart(c.HEALTH, c.MONEY)
+        speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
+        enemy_group.empty()
+        tower_group.empty()
+
     world = World(map_image, level_data, health, money, pg.time.get_ticks(), level)
 
     enemy_group = pg.sprite.Group()
@@ -359,6 +373,19 @@ def play_level(map_dir, level_data, health, money, level, coin):
             selected_tile = None
             selected_tower_type = None
             selected_tower_pos = None
+            screen.blit(pause_mask, pause_mask_rect)
+            screen.blit(reward_surface, reward_surface_rect)
+            screen.blit(coin_image, coin_image_rect)
+            draw_text("Reward", text_font, (255, 255, 255), 630, 450, center=True)
+            draw_text(f'{world.reward}', text_font, (255, 255, 255), 650, 522, center=True)
+            if game_restart_button.draw(screen):
+                restart(coin)
+            if game_end_button.draw(screen):
+                world.game_over = True
+                coin += world.reward
+                world.reward = 0
+                save_data()
+                run = False
 
         if world.game_pause:
             screen.blit(pause_mask, pause_mask_rect)
@@ -370,17 +397,12 @@ def play_level(map_dir, level_data, health, money, level, coin):
                 world.game_pause = not world.game_pause
                 game_pause()
             if game_restart_button.draw(screen):
-                world.restart(c.HEALTH, c.MONEY)
-                speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
-                enemy_group.empty()
-                tower_group.empty()
+                restart(coin)
             if game_end_button.draw(screen):
                 world.game_over = True
                 coin += world.reward
                 world.reward = 0
-                with open('assets/data.json', 'w') as f:
-                    js = json.dumps({"coin": coin})
-                    f.write(js)
+                save_data()
                 run = False
 
         # event

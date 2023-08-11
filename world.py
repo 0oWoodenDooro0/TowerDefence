@@ -50,7 +50,7 @@ class World:
 
     def process_enemies(self):
         enemy_type = random.choice(ENEMY_SPAWN_TYPE_DATA)
-        num_of_spawn = random.randint(min(30, self.wave), min(40, 5 + self.wave))
+        num_of_spawn = random.randint(min(30,  3 + self.wave // 2), min(40, 8 + self.wave // 2))
         if enemy_type != "regular":
             num_of_spawn = int(num_of_spawn * 0.8)
         for i in range(num_of_spawn):
@@ -73,6 +73,7 @@ class World:
         self.enemy_list = []
 
     def restart(self, health, money):
+        self.reward = 0
         self.game_speed = 1
         self.run_pause = False
         self.game_pause = False
