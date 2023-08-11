@@ -4,7 +4,8 @@ from enemy_data import ENEMY_SPAWN_TYPE_DATA, SPAWN_COOLDOWN_DATA
 
 
 class World:
-    def __init__(self, map_image, data, health, money, last_enemy_spawn):
+    def __init__(self, map_image, data, health, money, last_enemy_spawn, level):
+        self.level = level
         self.game_speed = 1
         self.run_pause = False
         self.game_pause = False
@@ -12,7 +13,8 @@ class World:
         self.spawn_cooldown = 0
         self.last_enemy_spawn = last_enemy_spawn
         self.elapsed_time = 0
-        self.wave = 0
+        self.wave = 1
+        self.reward = 0
         self.image = map_image
         self.tower_tile_id = []
         self.tile_map = []
@@ -48,7 +50,7 @@ class World:
 
     def process_enemies(self):
         enemy_type = random.choice(ENEMY_SPAWN_TYPE_DATA)
-        num_of_spawn = 2 + random.randint(0 + self.wave * 2, 5 + self.wave * 2)
+        num_of_spawn = random.randint(min(30, 2 + self.wave * 2), min(40, 7 + self.wave * 2))
         if enemy_type == "regular":
             num_of_spawn = int(num_of_spawn * 1.2)
         for i in range(num_of_spawn):

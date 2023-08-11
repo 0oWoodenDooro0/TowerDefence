@@ -6,7 +6,6 @@ import pygame as pg
 import constants as c
 from button import Button
 from enemy import Enemy
-from enemy_data import ENEMY_SPAWN_TYPE_DATA
 from tower import Tower, AttackTower, EffectTower, RangeOnlyTower
 from tower_data import TOWER_TYPE_DATA, TOWER_DATA, TOWER_NAME
 from world import World
@@ -23,6 +22,21 @@ text_font = pg.font.Font('assets/DigitalDisco-Thin.ttf', 24)
 title_font = pg.font.Font('assets/DigitalDisco-Thin.ttf', 100)
 
 
+def load_data():
+    try:
+        with open('assets/data.json') as f:
+            data = json.load(f)
+            return data["coin"]
+    except EnvironmentError:
+        with open('assets/data.json', 'w') as f:
+            js = json.dumps({"coin": 0})
+            f.write(js)
+            return 0
+
+
+coin = load_data()
+
+
 def draw_text(text: str, font, text_color, x, y, center=False):
     img = font.render(text, True, text_color)
     if center:
@@ -32,7 +46,7 @@ def draw_text(text: str, font, text_color, x, y, center=False):
         screen.blit(img, (x, y))
 
 
-def play_level(map_dir, level_data, health, money):
+def play_level(map_dir, level_data, health, money, level, coin):
     # game variables
     wave_started: bool = False
     selected_tower: Tower | None = None
@@ -89,14 +103,21 @@ def play_level(map_dir, level_data, health, money):
     game_end_image = pg.image.load('assets/buttons/game_end.png').convert_alpha()
     selected_tower_image = pg.image.load('assets/buttons/selected_tower.png').convert_alpha()
     selected_tile_image = pg.image.load('assets/buttons/selected_tile.png').convert_alpha()
+    coin_image = pg.image.load('assets/buttons/coin.png').convert_alpha()
     selected_tower_rect = selected_tower_image.get_rect()
     selected_tile_rect = selected_tile_image.get_rect()
+    coin_image_rect = coin_image.get_rect()
+    coin_image_rect.center = (592, 522)
 
     pause_mask = pg.Surface((c.SCREEN_WIDTH + c.SIDE_PANEL, c.SCREEN_HEIGHT))
     pause_mask.fill((0, 0, 0))
     pause_mask.set_alpha(100)
     pause_mask_rect = pause_mask.get_rect()
     pause_mask_rect.topleft = (0, 0)
+    reward_surface = pg.Surface((200, 150))
+    reward_surface.fill((60, 60, 60))
+    reward_surface_rect = reward_surface.get_rect()
+    reward_surface_rect.center = ((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2, 500)
 
     def create_tower(tile_pos, range_only=False):
         if range_only:
@@ -149,7 +170,7 @@ def play_level(map_dir, level_data, health, money):
             if type(t) is AttackTower:
                 t.pause(pg.time.get_ticks(), world)
 
-    world = World(map_image, level_data, health, money, pg.time.get_ticks())
+    world = World(map_image, level_data, health, money, pg.time.get_ticks(), level)
 
     enemy_group = pg.sprite.Group()
     tower_group = pg.sprite.Group()
@@ -215,7 +236,6 @@ def play_level(map_dir, level_data, health, money):
                 draw_text(f'Num of Enemy : {world.next_wave_enemies_num}', text_font, "black", c.SCREEN_WIDTH + 5, 380)
                 start_button.change_image(start_image)
                 if start_button.draw(screen):
-                    world.wave += 1
                     wave_started = True
             else:
                 if world.run_pause:
@@ -229,12 +249,14 @@ def play_level(map_dir, level_data, health, money):
                 if pg.time.get_ticks() - world.last_enemy_spawn > world.spawn_cooldown / world.game_speed and not world.run_pause and not world.game_pause:
                     if world.spawned_enemies < len(world.enemy_list):
                         enemy_type = world.enemy_list[world.spawned_enemies]
-                        enemy = Enemy(enemy_type, world.waypoints, enemy_images, world.wave)
+                        enemy = Enemy(enemy_type, world.waypoints, enemy_images, world.wave, world.level)
                         enemy_group.add(enemy)
                         world.spawned_enemies += 1
                         world.last_enemy_spawn = pg.time.get_ticks()
 
             if world.check_wave_completed():
+                world.reward = int(world.reward + 10 * world.wave * (1 + (world.level - 1) * 0.2))
+                world.wave += 1
                 wave_started = False
                 world.last_enemy_spawn = pg.time.get_ticks()
                 world.reset_wave()
@@ -340,6 +362,10 @@ def play_level(map_dir, level_data, health, money):
 
         if world.game_pause:
             screen.blit(pause_mask, pause_mask_rect)
+            screen.blit(reward_surface, reward_surface_rect)
+            screen.blit(coin_image, coin_image_rect)
+            draw_text("Reward", text_font, (255, 255, 255), 630, 450, center=True)
+            draw_text(f'{world.reward}', text_font, (255, 255, 255), 650, 522, center=True)
             if game_resume_button.draw(screen):
                 world.game_pause = not world.game_pause
                 game_pause()
@@ -350,6 +376,12 @@ def play_level(map_dir, level_data, health, money):
                 tower_group.empty()
             if game_end_button.draw(screen):
                 world.game_over = True
+                coin += world.reward
+                world.reward = 0
+                with open('assets/data.json', 'w') as f:
+                    js = json.dumps({"coin": coin})
+                    f.write(js)
+                run = False
 
         # event
         for event in pg.event.get():
@@ -371,17 +403,19 @@ def play_level(map_dir, level_data, health, money):
                     world.game_pause = not world.game_pause
                     game_pause()
                 if event.key == pg.K_SPACE and not wave_started:
-                    world.wave += 1
                     wave_started = True
         pg.display.flip()
 
 
-def menu():
+def menu(coin):
     # load images
     select_level_image = pg.image.load('assets/buttons/select_level.png').convert_alpha()
     research_image = pg.image.load('assets/buttons/research.png').convert_alpha()
     settings_image = pg.image.load('assets/buttons/settings.png').convert_alpha()
     exit_image = pg.image.load('assets/buttons/exit.png').convert_alpha()
+    coin_image = pg.image.load('assets/buttons/coin.png').convert_alpha()
+    coin_image_rect = coin_image.get_rect()
+    coin_image_rect.topleft = (1000, 10)
 
     select_level_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 620, select_level_image)
     research_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 700, research_image)
@@ -396,9 +430,12 @@ def menu():
         screen.fill((0, 0, 0))
 
         draw_text('Tower Defense', title_font, "grey100", (c.SCREEN_WIDTH + c.SIDE_PANEL) // 2, 200, True)
+        screen.blit(coin_image, coin_image_rect)
+        draw_text(f'{coin}', text_font, "grey100", 1080, 32)
 
         if select_level_button.draw(screen):
-            select_level()
+            select_level(coin)
+            coin = load_data()
         if research_button.draw(screen):
             pass
         if settings_button.draw(screen):
@@ -409,11 +446,13 @@ def menu():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                run = False
 
         pg.display.flip()
 
 
-def select_level():
+def select_level(coin):
     # Load image
     level_image = pg.image.load('assets/buttons/level.png').convert_alpha()
     arrow_back_image = pg.image.load('assets/buttons/arrow_back.png').convert_alpha()
@@ -441,15 +480,17 @@ def select_level():
             if level_button.draw(screen) and level_json_data[i][:-4] == level_map_data[i][:-4]:
                 with open(f'assets/level/{level_json_data[i]}') as f:
                     level_data = json.load(f)
-                    play_level(f'assets/level/{level_map_data[i]}', level_data, c.HEALTH, c.MONEY)
+                    play_level(f'assets/level/{level_map_data[i]}', level_data, c.HEALTH, c.MONEY, i + 1, coin)
             draw_text(str(i + 1), text_font, "grey100", x, y, center=True)
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                run = False
 
         pg.display.flip()
 
 
-menu()
+menu(coin)
 pg.quit()
