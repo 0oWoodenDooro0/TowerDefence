@@ -13,7 +13,7 @@ class Tower(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.level = 1
         self.tower_type = tower_type
-        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range")
+        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range") * c.TILE_SIZE
         self.cost = TOWER_DATA[self.tower_type][self.level - 1].get("cost")
         self.sell = TOWER_DATA[self.tower_type][self.level - 1].get("sell")
 
@@ -38,7 +38,7 @@ class Tower(pg.sprite.Sprite):
 
     def upgrade(self):
         self.level += 1
-        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range")
+        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range") * c.TILE_SIZE
         self.cost = TOWER_DATA[self.tower_type][self.level - 1].get("cost")
         self.sell = TOWER_DATA[self.tower_type][self.level - 1].get("sell")
 
@@ -57,7 +57,7 @@ class Tower(pg.sprite.Sprite):
     def draw_next_range(self, surface):
         if self.level >= len(TOWER_DATA[self.tower_type]):
             return None, None
-        next_range = TOWER_DATA[self.tower_type][self.level].get("range")
+        next_range = TOWER_DATA[self.tower_type][self.level].get("range") * c.TILE_SIZE
         range_image = pg.Surface((next_range * 2, next_range * 2))
         range_image.fill((0, 0, 0))
         range_image.set_colorkey((0, 0, 0))
