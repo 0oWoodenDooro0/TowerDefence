@@ -1,11 +1,12 @@
 import json
 import os
+
 import pygame as pg
 
 import constants as c
 from button import Button
 from enemy import Enemy
-from enemy_data import ENEMY_SPAWN_DATA
+from enemy_data import ENEMY_SPAWN_TYPE_DATA
 from tower import Tower, AttackTower, EffectTower, RangeOnlyTower
 from tower_data import TOWER_TYPE_DATA, TOWER_DATA, TOWER_NAME
 from world import World
@@ -33,7 +34,7 @@ def draw_text(text: str, font, text_color, x, y, center=False):
 
 def play_level(map_dir, level_data, health, money):
     # game variables
-    level_started: bool = False
+    wave_started: bool = False
     selected_tower: Tower | None = None
     selected_tile: tuple | None = None
     selected_tower_type: str | None = None
@@ -148,8 +149,7 @@ def play_level(map_dir, level_data, health, money):
             if type(t) is AttackTower:
                 t.pause(pg.time.get_ticks(), world)
 
-    world = World(map_image, level_data, health, money, pg.time.get_ticks(), c.SPAWN_COOLDOWN)
-    world.process_enemies()
+    world = World(map_image, level_data, health, money, pg.time.get_ticks())
 
     enemy_group = pg.sprite.Group()
     tower_group = pg.sprite.Group()
@@ -197,7 +197,7 @@ def play_level(map_dir, level_data, health, money):
 
         draw_text(f'Health: {world.health}', text_font, "black", c.SCREEN_WIDTH + 5, 0)
         draw_text(f'Money: {world.money}', text_font, "black", c.SCREEN_WIDTH + 5, 30)
-        draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 60)
+        draw_text(f'Wave: {world.wave}', text_font, "black", c.SCREEN_WIDTH + 5, 60)
 
         if game_pause_button.draw(screen) and not world.game_pause:
             world.game_pause = not world.game_pause
@@ -210,14 +210,13 @@ def play_level(map_dir, level_data, health, money):
                 world.last_enemy_spawn = (pg.time.get_ticks() - world.last_enemy_spawn) / world.game_speed + world.last_enemy_spawn
                 speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
 
-            if not level_started:
-                draw_text(f'regular: {ENEMY_SPAWN_DATA[world.level].get("regular")}', text_font, "black", c.SCREEN_WIDTH + 5, 350)
-                draw_text(f'fast: {ENEMY_SPAWN_DATA[world.level].get("fast")}', text_font, "black", c.SCREEN_WIDTH + 5, 380)
-                draw_text(f'strong: {ENEMY_SPAWN_DATA[world.level].get("strong")}', text_font, "black", c.SCREEN_WIDTH + 5, 410)
+            if not wave_started:
+                draw_text(f'Enemy Type: {world.next_wave_enemies_type}', text_font, "black", c.SCREEN_WIDTH + 5, 350)
+                draw_text(f'Num of Enemy : {world.next_wave_enemies_num}', text_font, "black", c.SCREEN_WIDTH + 5, 380)
                 start_button.change_image(start_image)
                 if start_button.draw(screen):
-                    world.level += 1
-                    level_started = True
+                    world.wave += 1
+                    wave_started = True
             else:
                 if world.run_pause:
                     start_button.change_image(resume_image)
@@ -227,22 +226,19 @@ def play_level(map_dir, level_data, health, money):
                     world.run_pause = not world.run_pause
                     game_pause()
 
-                if pg.time.get_ticks() - world.last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed and not world.run_pause and not world.game_pause:
+                if pg.time.get_ticks() - world.last_enemy_spawn > world.spawn_cooldown / world.game_speed and not world.run_pause and not world.game_pause:
                     if world.spawned_enemies < len(world.enemy_list):
                         enemy_type = world.enemy_list[world.spawned_enemies]
-                        enemy = Enemy(enemy_type, world.waypoints, enemy_images, world.level)
+                        enemy = Enemy(enemy_type, world.waypoints, enemy_images, world.wave)
                         enemy_group.add(enemy)
                         world.spawned_enemies += 1
                         world.last_enemy_spawn = pg.time.get_ticks()
 
-            if world.check_level_completed():
-                if world.level < len(ENEMY_SPAWN_DATA):
-                    level_started = False
-                    world.last_enemy_spawn = pg.time.get_ticks()
-                    world.reset_level()
-                    world.process_enemies()
-                else:
-                    world.game_over = True
+            if world.check_wave_completed():
+                wave_started = False
+                world.last_enemy_spawn = pg.time.get_ticks()
+                world.reset_wave()
+                world.process_enemies()
 
             if selected_tile:
                 for i in range(4):
@@ -348,12 +344,12 @@ def play_level(map_dir, level_data, health, money):
                 world.game_pause = not world.game_pause
                 game_pause()
             if game_restart_button.draw(screen):
-                world.restart(c.HEALTH, c.MONEY, c.SPAWN_COOLDOWN)
+                world.restart(c.HEALTH, c.MONEY)
                 speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
                 enemy_group.empty()
                 tower_group.empty()
             if game_end_button.draw(screen):
-                run = False
+                world.game_over = True
 
         # event
         for event in pg.event.get():
@@ -374,9 +370,9 @@ def play_level(map_dir, level_data, health, money):
                 if event.key == pg.K_ESCAPE:
                     world.game_pause = not world.game_pause
                     game_pause()
-                if event.key == pg.K_SPACE and not level_started:
-                    world.level += 1
-                    level_started = True
+                if event.key == pg.K_SPACE and not wave_started:
+                    world.wave += 1
+                    wave_started = True
         pg.display.flip()
 
 

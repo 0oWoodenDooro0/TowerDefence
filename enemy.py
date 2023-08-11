@@ -8,13 +8,12 @@ from health_bar import HealthBar
 
 
 class Enemy(pg.sprite.Sprite):
-    def __init__(self, enemy_type: str, waypoints: list, images: dict, level: int):
+    def __init__(self, enemy_type: str, waypoints: list, images: dict, wave: int):
         pg.sprite.Sprite.__init__(self)
         self.enemy_type = enemy_type
-        self.health_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["health_level_growth"]
-        self.speed_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["speed_level_growth"]
-        self.health = ENEMY_TYPE_DATA.get(enemy_type)["health"] + self.health_level_growth * level
-        self.speed = ENEMY_TYPE_DATA.get(enemy_type)["speed"] + self.speed_level_growth * level
+        self.health_level_growth = ENEMY_TYPE_DATA.get(enemy_type)["health_wave_growth"]
+        self.health = ENEMY_TYPE_DATA.get(enemy_type)["health"] + self.health_level_growth * wave
+        self.speed = ENEMY_TYPE_DATA.get(enemy_type)["speed"]
         self.money = ENEMY_TYPE_DATA.get(enemy_type)["money"]
         self.slow_rate = 1
 

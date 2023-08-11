@@ -1,17 +1,18 @@
 import random
 
-from enemy_data import ENEMY_SPAWN_DATA
+from enemy_data import ENEMY_SPAWN_TYPE_DATA, SPAWN_COOLDOWN_DATA
 
 
 class World:
-    def __init__(self, map_image, data, health, money, last_enemy_spawn, spawn_cooldown):
+    def __init__(self, map_image, data, health, money, last_enemy_spawn):
         self.game_speed = 1
         self.run_pause = False
         self.game_pause = False
         self.game_over = False
-        self.last_enemy_spawn = last_enemy_spawn - spawn_cooldown
+        self.spawn_cooldown = 0
+        self.last_enemy_spawn = last_enemy_spawn
         self.elapsed_time = 0
-        self.level = 0
+        self.wave = 0
         self.image = map_image
         self.tower_tile_id = []
         self.tile_map = []
@@ -23,6 +24,9 @@ class World:
         self.spawned_enemies = 0
         self.killed_enemies = 0
         self.missed_enemies = 0
+        self.next_wave_enemies_type = ""
+        self.next_wave_enemies_num = 0
+        self.process_enemies()
         self.process_data()
 
     def process_data(self):
@@ -43,33 +47,36 @@ class World:
             self.waypoints.append((x, y))
 
     def process_enemies(self):
-        enemies = ENEMY_SPAWN_DATA[self.level]
-        for enemy_type in enemies:
-            enemies_to_spawn = enemies[enemy_type]
-            for enemy in range(enemies_to_spawn):
-                self.enemy_list.append(enemy_type)
-        random.shuffle(self.enemy_list)
+        enemy_type = random.choice(ENEMY_SPAWN_TYPE_DATA)
+        self.next_wave_enemies_type = enemy_type
+        num_of_spawn = 5 + random.randint(0 + self.wave * 3, 5 + self.wave * 3)
+        self.next_wave_enemies_num = num_of_spawn
+        for i in range(num_of_spawn):
+            self.enemy_list.append(enemy_type)
+        self.spawn_cooldown = random.choice(SPAWN_COOLDOWN_DATA)
+        self.last_enemy_spawn -= self.spawn_cooldown
 
     def draw(self, surface):
         surface.blit(self.image, (0, 0))
 
-    def check_level_completed(self):
+    def check_wave_completed(self):
         return self.killed_enemies + self.missed_enemies == len(self.enemy_list)
 
-    def reset_level(self):
+    def reset_wave(self):
         self.spawned_enemies = 0
         self.killed_enemies = 0
         self.missed_enemies = 0
         self.enemy_list = []
 
-    def restart(self, health, money, spawn_cooldown):
+    def restart(self, health, money):
         self.game_speed = 1
         self.run_pause = False
         self.game_pause = False
         self.game_over = False
-        self.last_enemy_spawn = self.last_enemy_spawn - spawn_cooldown
+        self.spawn_cooldown = 0
+        self.last_enemy_spawn = self.last_enemy_spawn
         self.elapsed_time = 0
-        self.level = 0
+        self.wave = 0
         self.health = health
         self.money = money
         self.enemy_list = []
