@@ -384,10 +384,12 @@ def menu():
     # load images
     select_level_image = pg.image.load('assets/buttons/select_level.png').convert_alpha()
     research_image = pg.image.load('assets/buttons/research.png').convert_alpha()
+    settings_image = pg.image.load('assets/buttons/settings.png').convert_alpha()
     exit_image = pg.image.load('assets/buttons/exit.png').convert_alpha()
 
-    select_level_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 700, select_level_image)
-    research_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 780, research_image)
+    select_level_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 620, select_level_image)
+    research_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 700, research_image)
+    settings_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 780, settings_image)
     exit_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 860, exit_image)
 
     run = True
@@ -402,6 +404,8 @@ def menu():
         if select_level_button.draw(screen):
             select_level()
         if research_button.draw(screen):
+            pass
+        if settings_button.draw(screen):
             pass
         if exit_button.draw(screen):
             run = False
