@@ -142,6 +142,12 @@ def play_level(map_dir, level_data, health, money):
             if type(t) == RangeOnlyTower:
                 t.kill()
 
+    def game_pause():
+        world.pause(pg.time.get_ticks())
+        for t in tower_group:
+            if type(t) is AttackTower:
+                t.pause(pg.time.get_ticks(), world)
+
     world = World(map_image, level_data, health, money, pg.time.get_ticks(), c.SPAWN_COOLDOWN)
     world.process_enemies()
 
@@ -194,11 +200,8 @@ def play_level(map_dir, level_data, health, money):
         draw_text(f'Level: {world.level}', text_font, "black", c.SCREEN_WIDTH + 5, 60)
 
         if game_pause_button.draw(screen) and not world.game_pause:
-            world.game_pause = True
-            world.pause(pg.time.get_ticks())
-            for tower in tower_group:
-                if type(tower) is AttackTower:
-                    tower.pause(pg.time.get_ticks(), world)
+            world.game_pause = not world.game_pause
+            game_pause()
 
         if not world.game_over:
 
@@ -222,10 +225,7 @@ def play_level(map_dir, level_data, health, money):
                     start_button.change_image(pause_image)
                 if start_button.draw(screen) and not world.game_pause:
                     world.run_pause = not world.run_pause
-                    world.pause(pg.time.get_ticks())
-                    for tower in tower_group:
-                        if type(tower) is AttackTower:
-                            tower.pause(pg.time.get_ticks(), world)
+                    game_pause()
 
                 if pg.time.get_ticks() - world.last_enemy_spawn > c.SPAWN_COOLDOWN / world.game_speed and not world.run_pause and not world.game_pause:
                     if world.spawned_enemies < len(world.enemy_list):
@@ -336,15 +336,17 @@ def play_level(map_dir, level_data, health, money):
                     world.money += selected_tower.sell
                     tower_group.remove(selected_tower)
                     selected_tower = None
+        else:
+            selected_tower = None
+            selected_tile = None
+            selected_tower_type = None
+            selected_tower_pos = None
 
         if world.game_pause:
             screen.blit(pause_mask, pause_mask_rect)
             if game_resume_button.draw(screen):
-                world.game_pause = False
-                world.pause(pg.time.get_ticks())
-                for tower in tower_group:
-                    if type(tower) is AttackTower:
-                        tower.pause(pg.time.get_ticks(), world)
+                world.game_pause = not world.game_pause
+                game_pause()
             if game_restart_button.draw(screen):
                 world.restart(c.HEALTH, c.MONEY, c.SPAWN_COOLDOWN)
                 speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
@@ -368,7 +370,13 @@ def play_level(map_dir, level_data, health, money):
                         selected_tile = select_tile(mouse_pos)
                     else:
                         selected_tile = None
-
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    world.game_pause = not world.game_pause
+                    game_pause()
+                if event.key == pg.K_SPACE and not level_started:
+                    world.level += 1
+                    level_started = True
         pg.display.flip()
 
 
