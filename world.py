@@ -48,11 +48,13 @@ class World:
 
     def process_enemies(self):
         enemy_type = random.choice(ENEMY_SPAWN_TYPE_DATA)
-        self.next_wave_enemies_type = enemy_type
-        num_of_spawn = 5 + random.randint(0 + self.wave * 3, 5 + self.wave * 3)
-        self.next_wave_enemies_num = num_of_spawn
+        num_of_spawn = 2 + random.randint(0 + self.wave * 2, 5 + self.wave * 2)
+        if enemy_type == "regular":
+            num_of_spawn = int(num_of_spawn * 1.2)
         for i in range(num_of_spawn):
             self.enemy_list.append(enemy_type)
+        self.next_wave_enemies_type = enemy_type
+        self.next_wave_enemies_num = num_of_spawn
         self.spawn_cooldown = random.choice(SPAWN_COOLDOWN_DATA)
         self.last_enemy_spawn -= self.spawn_cooldown
 
