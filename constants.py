@@ -18,5 +18,5 @@ DEFAULT_DATA = {
     "atk_speed_boost": 0,
     "towers_sell_refund": 0,
     "upgrade_price": 0,
-    "green_papers_bonus": 0
+    "coin_bonus": 0
 }
