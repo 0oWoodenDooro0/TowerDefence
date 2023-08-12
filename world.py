@@ -1,10 +1,11 @@
 import random
 
 from enemy_data import ENEMY_SPAWN_TYPE_DATA, SPAWN_COOLDOWN_DATA
+import constants as c
 
 
 class World:
-    def __init__(self, map_image, data, health, money, last_enemy_spawn, level):
+    def __init__(self, map_image, data, health, money, last_enemy_spawn, level, bonus):
         self.level = level
         self.game_speed = 1
         self.run_pause = False
@@ -14,14 +15,14 @@ class World:
         self.last_enemy_spawn = last_enemy_spawn
         self.elapsed_time = 0
         self.wave = 1
+        self.bonus = bonus
         self.reward = 0
         self.image = map_image
         self.tower_tile_id = []
         self.tile_map = []
         self.waypoints = []
-        self.level_data = data
-        self.health = health
-        self.money = money
+        self.money = money + bonus.get_bonus_data("starting_money_bonus")
+        self.health = health + bonus.get_bonus_data("starting_health_bonus")
         self.enemy_list = []
         self.spawned_enemies = 0
         self.killed_enemies = 0
@@ -29,10 +30,10 @@ class World:
         self.next_wave_enemies_type = ""
         self.next_wave_enemies_num = 0
         self.process_enemies()
-        self.process_data()
+        self.process_data(data)
 
-    def process_data(self):
-        for layer in self.level_data["layers"]:
+    def process_data(self, data):
+        for layer in data["layers"]:
             match layer["name"]:
                 case "waypoints":
                     waypoints = layer["objects"][0]["polyline"]

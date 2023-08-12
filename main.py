@@ -9,6 +9,7 @@ from enemy import Enemy
 from tower import Tower, AttackTower, EffectTower, RangeOnlyTower
 from tower_data import TOWER_TYPE_DATA, TOWER_DATA, TOWER_NAME
 from world import World
+from bonus import Bonus
 
 pg.init()
 
@@ -34,7 +35,7 @@ def load_data():
             return c.DEFAULT_DATA
 
 
-coin = load_data()["coin"]
+json_data = load_data()
 
 
 def draw_text(text: str, font, text_color, x, y, center=False):
@@ -46,7 +47,7 @@ def draw_text(text: str, font, text_color, x, y, center=False):
         screen.blit(img, (x, y))
 
 
-def play_level(map_dir, level_data, health, money, level):
+def play_level(map_dir, level_data, health, money, level, data):
     # game variables
     wave_started: bool = False
     selected_tower: Tower | None = None
@@ -121,13 +122,13 @@ def play_level(map_dir, level_data, health, money, level):
 
     def create_tower(tile_pos, range_only=False):
         if range_only:
-            new_tower = RangeOnlyTower(tower_images, tower_base_images, selected_tower_type, tile_pos)
+            new_tower = RangeOnlyTower(tower_images, tower_base_images, selected_tower_type, tile_pos, bonus)
         else:
             match selected_tower_type:
                 case "basic" | "sniper" | "cannon":
-                    new_tower = AttackTower(tower_images, tower_base_images, selected_tower_type, tile_pos)
+                    new_tower = AttackTower(tower_images, tower_base_images, selected_tower_type, tile_pos, bonus)
                 case "freeze":
-                    new_tower = EffectTower(tower_images, tower_base_images, selected_tower_type, tile_pos)
+                    new_tower = EffectTower(tower_images, tower_base_images, selected_tower_type, tile_pos, bonus)
                 case _:
                     new_tower = None
         tower_group.add(new_tower)
@@ -185,7 +186,8 @@ def play_level(map_dir, level_data, health, money, level):
         enemy_group.empty()
         tower_group.empty()
 
-    world = World(map_image, level_data, health, money, pg.time.get_ticks(), level)
+    bonus = Bonus(data)
+    world = World(map_image, level_data, health, money, pg.time.get_ticks(), level, bonus)
 
     enemy_group = pg.sprite.Group()
     tower_group = pg.sprite.Group()
@@ -357,7 +359,7 @@ def play_level(map_dir, level_data, health, money, level):
                         case "basic" | "sniper" | "cannon":
                             draw_text(f'damage: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
                             draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
-                            draw_text(f'attack speed: {1000 / TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("cooldown"):.2f}', text_font, "black",
+                            draw_text(f'attack speed: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("atk_speed")}', text_font, "black",
                                       c.SCREEN_WIDTH + 5, 240)
                         case "freeze":
                             draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f}', text_font, "black",
@@ -428,7 +430,7 @@ def play_level(map_dir, level_data, health, money, level):
         pg.display.flip()
 
 
-def menu(coin):
+def menu(data):
     # load images
     select_level_image = pg.image.load('assets/buttons/select_level.png').convert_alpha()
     research_image = pg.image.load('assets/buttons/research.png').convert_alpha()
@@ -443,6 +445,8 @@ def menu(coin):
     settings_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 780, settings_image)
     exit_button = Button((c.SCREEN_WIDTH + c.SIDE_PANEL) // 2 - 60, 860, exit_image)
 
+    coin = data["coin"]
+
     run = True
     while run:
 
@@ -455,8 +459,9 @@ def menu(coin):
         draw_text(f'{coin}', text_font, "grey100", 1080, 32)
 
         if select_level_button.draw(screen):
-            select_level()
-            coin = load_data()["coin"]
+            select_level(data)
+            data = load_data()
+            coin = data["coin"]
         if research_button.draw(screen):
             pass
         if settings_button.draw(screen):
@@ -473,7 +478,7 @@ def menu(coin):
         pg.display.flip()
 
 
-def select_level():
+def select_level(data):
     # Load image
     level_image = pg.image.load('assets/buttons/level.png').convert_alpha()
     arrow_back_image = pg.image.load('assets/buttons/arrow_back.png').convert_alpha()
@@ -501,7 +506,7 @@ def select_level():
             if level_button.draw(screen) and level_json_data[i][:-4] == level_map_data[i][:-4]:
                 with open(f'assets/level/{level_json_data[i]}') as f:
                     level_data = json.load(f)
-                    play_level(f'assets/level/{level_map_data[i]}', level_data, c.HEALTH, c.MONEY, i + 1)
+                    play_level(f'assets/level/{level_map_data[i]}', level_data, c.HEALTH, c.MONEY, i + 1, data)
             draw_text(str(i + 1), text_font, "grey100", x, y, center=True)
 
         for event in pg.event.get():
@@ -529,5 +534,5 @@ def research(data):
         pg.display.flip()
 
 
-menu(coin)
+menu(json_data)
 pg.quit()
