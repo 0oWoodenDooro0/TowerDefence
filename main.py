@@ -178,8 +178,8 @@ def play_level(map_dir, level_data, health, money, level, data):
         with open('assets/data.json', 'w') as f:
             json.dump(data, f)
 
-    def get_attribute(tower_type: str, tower_level: int, attribute: str, is_bonus: bool = True):
-        return TOWER_DATA[tower_type][tower_level].get(attribute) * bonus.get_bonus_data(attribute) if is_bonus else TOWER_DATA[tower_type][tower_level].get(attribute)
+    def get_attribute(tower_type: str, attribute: str, is_bonus: bool = True):
+        return TOWER_DATA[tower_type][0].get(attribute) * bonus.get_bonus_data(attribute) if is_bonus else TOWER_DATA[tower_type][0].get(attribute)
 
     def restart():
         save_data(world.reward)
@@ -297,16 +297,12 @@ def play_level(map_dir, level_data, health, money, level, data):
                     draw_text(f'Tower Type: {selected_tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
                     match selected_tower_type:
                         case "basic" | "sniper" | "cannon":
-                            draw_text(f'damage: {round(get_attribute(selected_tower_type, 0, "damage"), 2)}', text_font, "black",
-                                      c.SCREEN_WIDTH + 5, 180)
-                            draw_text(f'attack speed: {round(get_attribute(selected_tower_type, 0, "atk_speed"), 2)}', text_font, "black",
-                                      c.SCREEN_WIDTH + 5, 210)
-                            draw_text(f'range: {round(get_attribute(selected_tower_type, 0, "range"), 2)}', text_font, "black", c.SCREEN_WIDTH + 5,
-                                      240)
+                            draw_text(f'damage: {round(get_attribute(selected_tower_type, "damage"), 2)}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                            draw_text(f'attack speed: {round(get_attribute(selected_tower_type, "atk_speed"), 2)}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                            draw_text(f'range: {round(get_attribute(selected_tower_type, "range"), 2)}', text_font, "black", c.SCREEN_WIDTH + 5, 240)
                         case "freeze":
-                            draw_text(f'slow rate: {1 - get_attribute(selected_tower_type, 0, "slow_rate", False):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
-                            draw_text(f'range: {round(get_attribute(selected_tower_type, 0, "range"), 2)}', text_font, "black", c.SCREEN_WIDTH + 5,
-                                      210)
+                            draw_text(f'slow rate: {1 - get_attribute(selected_tower_type, "slow_rate", False) :.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                            draw_text(f'range: {round(get_attribute(selected_tower_type, "range"), 2)}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
                     tower_cost = TOWER_TYPE_DATA[selected_tower_type].get("cost")
                     draw_text(f'Cost: {tower_cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
                     if world.money >= tower_cost:
