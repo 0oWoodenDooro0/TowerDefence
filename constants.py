@@ -8,3 +8,15 @@ FPS = 60
 TITLE = "Tower Defence"
 MONEY = 200
 HEALTH = 5
+DEFAULT_DATA = {
+    "coin": 0,
+    "starting_coin_bonus": 0,
+    "starting_health_bonus": 0,
+    "rotation_speed": 0,
+    "damage_boost": 0,
+    "range_boost": 0,
+    "atk_speed_boost": 0,
+    "towers_sell_refund": 0,
+    "upgrade_price": 0,
+    "green_papers_bonus": 0
+}

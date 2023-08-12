@@ -26,15 +26,15 @@ def load_data():
     try:
         with open('assets/data.json') as f:
             data = json.load(f)
-            return data["coin"]
+            return data
     except EnvironmentError:
         with open('assets/data.json', 'w') as f:
-            js = json.dumps({"coin": 0})
-            f.write(js)
-            return 0
+            data = json.dumps(c.DEFAULT_DATA)
+            f.write(data)
+            return c.DEFAULT_DATA
 
 
-coin = load_data()
+coin = load_data()["coin"]
 
 
 def draw_text(text: str, font, text_color, x, y, center=False):
@@ -46,7 +46,7 @@ def draw_text(text: str, font, text_color, x, y, center=False):
         screen.blit(img, (x, y))
 
 
-def play_level(map_dir, level_data, health, money, level, coin):
+def play_level(map_dir, level_data, health, money, level):
     # game variables
     wave_started: bool = False
     selected_tower: Tower | None = None
@@ -101,9 +101,9 @@ def play_level(map_dir, level_data, health, money, level, coin):
     game_resume_image = pg.image.load('assets/buttons/game_resume.png').convert_alpha()
     game_restart_image = pg.image.load('assets/buttons/game_restart.png').convert_alpha()
     game_end_image = pg.image.load('assets/buttons/game_end.png').convert_alpha()
-    selected_tower_image = pg.image.load('assets/buttons/selected_tower.png').convert_alpha()
-    selected_tile_image = pg.image.load('assets/buttons/selected_tile.png').convert_alpha()
-    coin_image = pg.image.load('assets/buttons/coin.png').convert_alpha()
+    selected_tower_image = pg.image.load('assets/image/selected_tower.png').convert_alpha()
+    selected_tile_image = pg.image.load('assets/image/selected_tile.png').convert_alpha()
+    coin_image = pg.image.load('assets/image/coin.png').convert_alpha()
     selected_tower_rect = selected_tower_image.get_rect()
     selected_tile_rect = selected_tile_image.get_rect()
     coin_image_rect = coin_image.get_rect()
@@ -170,15 +170,16 @@ def play_level(map_dir, level_data, health, money, level, coin):
             if type(t) is AttackTower:
                 t.pause(pg.time.get_ticks(), world)
 
-    def save_data():
+    def save_data(reward):
+        with open('assets/data.json', 'r') as f:
+            data = json.load(f)
+        data["coin"] += reward
         with open('assets/data.json', 'w') as f:
-            js = json.dumps({"coin": coin})
-            f.write(js)
+            json.dump(data, f)
 
-    def restart(coin):
-        coin += world.reward
+    def restart():
+        save_data(world.reward)
         world.reward = 0
-        save_data()
         world.restart(c.HEALTH, c.MONEY)
         speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
         enemy_group.empty()
@@ -379,12 +380,11 @@ def play_level(map_dir, level_data, health, money, level, coin):
             draw_text("Reward", text_font, (255, 255, 255), 630, 450, center=True)
             draw_text(f'{world.reward}', text_font, (255, 255, 255), 650, 522, center=True)
             if game_restart_button.draw(screen):
-                restart(coin)
+                restart()
             if game_end_button.draw(screen):
                 world.game_over = True
-                coin += world.reward
+                save_data(world.reward)
                 world.reward = 0
-                save_data()
                 run = False
 
         if world.game_pause:
@@ -397,12 +397,11 @@ def play_level(map_dir, level_data, health, money, level, coin):
                 world.game_pause = not world.game_pause
                 game_pause()
             if game_restart_button.draw(screen):
-                restart(coin)
+                restart()
             if game_end_button.draw(screen):
                 world.game_over = True
-                coin += world.reward
+                save_data(world.reward)
                 world.reward = 0
-                save_data()
                 run = False
 
         # event
@@ -435,7 +434,7 @@ def menu(coin):
     research_image = pg.image.load('assets/buttons/research.png').convert_alpha()
     settings_image = pg.image.load('assets/buttons/settings.png').convert_alpha()
     exit_image = pg.image.load('assets/buttons/exit.png').convert_alpha()
-    coin_image = pg.image.load('assets/buttons/coin.png').convert_alpha()
+    coin_image = pg.image.load('assets/image/coin.png').convert_alpha()
     coin_image_rect = coin_image.get_rect()
     coin_image_rect.topleft = (1000, 10)
 
@@ -456,8 +455,8 @@ def menu(coin):
         draw_text(f'{coin}', text_font, "grey100", 1080, 32)
 
         if select_level_button.draw(screen):
-            select_level(coin)
-            coin = load_data()
+            select_level()
+            coin = load_data()["coin"]
         if research_button.draw(screen):
             pass
         if settings_button.draw(screen):
@@ -474,7 +473,7 @@ def menu(coin):
         pg.display.flip()
 
 
-def select_level(coin):
+def select_level():
     # Load image
     level_image = pg.image.load('assets/buttons/level.png').convert_alpha()
     arrow_back_image = pg.image.load('assets/buttons/arrow_back.png').convert_alpha()
@@ -502,8 +501,24 @@ def select_level(coin):
             if level_button.draw(screen) and level_json_data[i][:-4] == level_map_data[i][:-4]:
                 with open(f'assets/level/{level_json_data[i]}') as f:
                     level_data = json.load(f)
-                    play_level(f'assets/level/{level_map_data[i]}', level_data, c.HEALTH, c.MONEY, i + 1, coin)
+                    play_level(f'assets/level/{level_map_data[i]}', level_data, c.HEALTH, c.MONEY, i + 1)
             draw_text(str(i + 1), text_font, "grey100", x, y, center=True)
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                run = False
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                run = False
+
+        pg.display.flip()
+
+
+def research(data):
+    run = True
+    while run:
+        clock.tick(c.FPS)
+
+        screen.fill((0, 0, 0))
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
