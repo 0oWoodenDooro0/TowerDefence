@@ -4,12 +4,12 @@ import os
 import pygame as pg
 
 import constants as c
+from bonus import Bonus
 from button import Button
 from enemy import Enemy
 from tower import Tower, AttackTower, EffectTower, RangeOnlyTower
 from tower_data import TOWER_TYPE_DATA, TOWER_DATA, TOWER_NAME
 from world import World
-from bonus import Bonus
 
 pg.init()
 
@@ -294,12 +294,16 @@ def play_level(map_dir, level_data, health, money, level, data):
                     draw_text(f'Tower Type: {selected_tower_type}', text_font, "black", c.SCREEN_WIDTH + 5, 150)
                     match selected_tower_type:
                         case "basic" | "sniper" | "cannon":
-                            draw_text(f'damage: {TOWER_DATA[selected_tower_type][0].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
-                            draw_text(f'attack speed: {TOWER_DATA[selected_tower_type][0].get("atk_speed"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
-                            draw_text(f'range: {TOWER_DATA[selected_tower_type][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 240)
+                            draw_text(f'damage: {round(TOWER_DATA[selected_tower_type][0].get("damage") * bonus.get_bonus_data("damage"), 2)}', text_font, "black",
+                                      c.SCREEN_WIDTH + 5, 180)
+                            draw_text(f'attack speed: {round(TOWER_DATA[selected_tower_type][0].get("atk_speed") * bonus.get_bonus_data("atk_speed"), 2)}', text_font, "black",
+                                      c.SCREEN_WIDTH + 5, 210)
+                            draw_text(f'range: {round(TOWER_DATA[selected_tower_type][0].get("range") * bonus.get_bonus_data("range"), 2)}', text_font, "black", c.SCREEN_WIDTH + 5,
+                                      240)
                         case "freeze":
                             draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower_type][0].get("slow_rate"):.2f}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
-                            draw_text(f'range: {TOWER_DATA[selected_tower_type][0].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                            draw_text(f'range: {round(TOWER_DATA[selected_tower_type][0].get("range") * bonus.get_bonus_data("range"), 2)}', text_font, "black", c.SCREEN_WIDTH + 5,
+                                      210)
                     tower_cost = TOWER_TYPE_DATA[selected_tower_type].get("cost")
                     draw_text(f'Cost: {tower_cost}', text_font, "black", c.SCREEN_WIDTH + 30, c.SCREEN_HEIGHT - 110)
                     if world.money >= tower_cost:
@@ -322,20 +326,20 @@ def play_level(map_dir, level_data, health, money, level, data):
                     match selected_tower.tower_type:
                         case "basic" | "sniper" | "cannon":
                             draw_text(
-                                f'damage: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("damage")}',
+                                f'damage: {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage") * bonus.get_bonus_data("damage"), 2)} -> {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("damage") * bonus.get_bonus_data("damage"), 2)}',
                                 text_font, "black", c.SCREEN_WIDTH + 5, 180)
                             draw_text(
-                                f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range")}',
+                                f'range: {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range") * bonus.get_bonus_data("range"), 2)} -> {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range") * bonus.get_bonus_data("range"), 2)}',
                                 text_font, "black", c.SCREEN_WIDTH + 5, 210)
                             draw_text(
-                                f'attack speed: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("atk_speed")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("atk_speed")}',
+                                f'attack speed: {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("atk_speed") * bonus.get_bonus_data("atk_speed"), 2)} -> {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("atk_speed") * bonus.get_bonus_data("atk_speed"), 2)}',
                                 text_font, "black", c.SCREEN_WIDTH + 5, 240)
                         case "freeze":
                             draw_text(
                                 f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f} -> {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("slow_rate"):.2f}',
                                 text_font, "black", c.SCREEN_WIDTH + 5, 180)
                             draw_text(
-                                f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")} -> {TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range")}',
+                                f'range: {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range") * bonus.get_bonus_data("range"), 2)} -> {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level].get("range") * bonus.get_bonus_data("range"), 2)}',
                                 text_font, "black", c.SCREEN_WIDTH + 5, 210)
                     if world.money >= selected_tower.cost:
                         buy_tower_button.change_image(upgrade_tower_image)
@@ -357,15 +361,18 @@ def play_level(map_dir, level_data, health, money, level, data):
                 else:
                     match selected_tower.tower_type:
                         case "basic" | "sniper" | "cannon":
-                            draw_text(f'damage: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage")}', text_font, "black", c.SCREEN_WIDTH + 5, 180)
-                            draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
-                            draw_text(f'attack speed: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("atk_speed")}', text_font, "black",
-                                      c.SCREEN_WIDTH + 5, 240)
+                            draw_text(f'damage: {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("damage") * bonus.get_bonus_data("damage"), 2)}',
+                                      text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                            draw_text(f'range: {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range") * bonus.get_bonus_data("range"), 2)}', text_font,
+                                      "black", c.SCREEN_WIDTH + 5, 210)
+                            draw_text(
+                                f'attack speed: {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("atk_speed") * bonus.get_bonus_data("atk_speed"), 2)}',
+                                text_font, "black", c.SCREEN_WIDTH + 5, 240)
                         case "freeze":
                             draw_text(f'slow_rate: {1 - TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("slow_rate"):.2f}', text_font, "black",
-                                      c.SCREEN_WIDTH + 5,
-                                      180)
-                            draw_text(f'range: {TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range")}', text_font, "black", c.SCREEN_WIDTH + 5, 210)
+                                      c.SCREEN_WIDTH + 5, 180)
+                            draw_text(f'range: {round(TOWER_DATA[selected_tower.tower_type][selected_tower.level - 1].get("range") * bonus.get_bonus_data("range"), 2)}', text_font,
+                                      "black", c.SCREEN_WIDTH + 5, 210)
                 draw_text(f'SELL: {selected_tower.sell}', text_font, "black", c.SCREEN_WIDTH + 170, c.SCREEN_HEIGHT - 110)
                 if sell_button.draw(screen):
                     world.money += selected_tower.sell

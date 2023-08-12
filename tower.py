@@ -14,9 +14,9 @@ class Tower(pg.sprite.Sprite):
         self.level = 1
         self.tower_type = tower_type
         self.bonus = bonus
-        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range") * c.TILE_SIZE * self.bonus.get_bonus_data("range")
-        self.cost = int(TOWER_DATA[self.tower_type][self.level - 1].get("cost") * self.bonus.get_bonus_data("cost"))
-        self.sell = int(TOWER_DATA[self.tower_type][self.level - 1].get("sell") * self.bonus.get_bonus_data("sell"))
+        self.range = round(TOWER_DATA[self.tower_type][self.level - 1].get("range") * self.bonus.get_bonus_data("range"), 2) * c.TILE_SIZE
+        self.cost = round(TOWER_DATA[self.tower_type][self.level - 1].get("cost") * self.bonus.get_bonus_data("cost"))
+        self.sell = round(TOWER_DATA[self.tower_type][self.level - 1].get("sell") * self.bonus.get_bonus_data("sell"))
 
         self.target = None
         self.selected = False
@@ -39,9 +39,9 @@ class Tower(pg.sprite.Sprite):
 
     def upgrade(self):
         self.level += 1
-        self.range = TOWER_DATA[self.tower_type][self.level - 1].get("range") * c.TILE_SIZE * self.bonus.get_bonus_data("range")
-        self.cost = int(TOWER_DATA[self.tower_type][self.level - 1].get("cost") * self.bonus.get_bonus_data("cost"))
-        self.sell = int(TOWER_DATA[self.tower_type][self.level - 1].get("sell") * self.bonus.get_bonus_data("sell"))
+        self.range = round(TOWER_DATA[self.tower_type][self.level - 1].get("range") * self.bonus.get_bonus_data("range"), 2) * c.TILE_SIZE
+        self.cost = round(TOWER_DATA[self.tower_type][self.level - 1].get("cost") * self.bonus.get_bonus_data("cost"))
+        self.sell = round(TOWER_DATA[self.tower_type][self.level - 1].get("sell") * self.bonus.get_bonus_data("sell"))
 
         self.range_image = pg.Surface((self.range * 2, self.range * 2))
         self.range_image.fill((0, 0, 0))
@@ -58,7 +58,7 @@ class Tower(pg.sprite.Sprite):
     def draw_next_range(self, surface):
         if self.level >= len(TOWER_DATA[self.tower_type]):
             return None, None
-        next_range = TOWER_DATA[self.tower_type][self.level].get("range") * c.TILE_SIZE * self.bonus.get_bonus_data("range")
+        next_range = round(TOWER_DATA[self.tower_type][self.level].get("range") * self.bonus.get_bonus_data("range"), 2) * c.TILE_SIZE
         range_image = pg.Surface((next_range * 2, next_range * 2))
         range_image.fill((0, 0, 0))
         range_image.set_colorkey((0, 0, 0))
@@ -72,9 +72,9 @@ class Tower(pg.sprite.Sprite):
 class AttackTower(Tower):
     def __init__(self, tower_images: dict, tower_base_images: dict, tower_type: str, tile_pos, bonus):
         Tower.__init__(self, tower_images, tower_base_images, tower_type, tile_pos, bonus)
-        self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage") * self.bonus.get_bonus_data("damage")
-        self.atk_speed = TOWER_DATA[self.tower_type][self.level - 1].get("atk_speed") * self.bonus.get_bonus_data("atk_speed")
-        self.rotate_speed = TOWER_DATA[self.tower_type][self.level - 1].get("rotate_speed") * self.bonus.get_bonus_data("rotate_speed")
+        self.damage = round(TOWER_DATA[self.tower_type][self.level - 1].get("damage") * self.bonus.get_bonus_data("damage"), 2)
+        self.atk_speed = round(TOWER_DATA[self.tower_type][self.level - 1].get("atk_speed") * self.bonus.get_bonus_data("atk_speed"), 2)
+        self.rotate_speed = round(TOWER_DATA[self.tower_type][self.level - 1].get("rotate_speed") * self.bonus.get_bonus_data("rotate_speed"), 2)
         self.cooldown = int(1000 / self.atk_speed)
 
         self.last_shot = pg.time.get_ticks() - self.cooldown
@@ -87,9 +87,9 @@ class AttackTower(Tower):
 
     def upgrade(self):
         Tower.upgrade(self)
-        self.damage = TOWER_DATA[self.tower_type][self.level - 1].get("damage") * self.bonus.get_bonus_data("damage")
-        self.atk_speed = TOWER_DATA[self.tower_type][self.level - 1].get("atk_speed") * self.bonus.get_bonus_data("atk_speed")
-        self.rotate_speed = TOWER_DATA[self.tower_type][self.level - 1].get("rotate_speed") * self.bonus.get_bonus_data("rotate_speed")
+        self.damage = round(TOWER_DATA[self.tower_type][self.level - 1].get("damage") * self.bonus.get_bonus_data("damage"), 2)
+        self.atk_speed = round(TOWER_DATA[self.tower_type][self.level - 1].get("atk_speed") * self.bonus.get_bonus_data("atk_speed"), 2)
+        self.rotate_speed = round(TOWER_DATA[self.tower_type][self.level - 1].get("rotate_speed") * self.bonus.get_bonus_data("rotate_speed"), 2)
         self.cooldown = int(1000 / self.atk_speed)
 
     def update(self, enemy_group: pg.sprite.Group, bullet_group: pg.sprite.Group, world: World):
