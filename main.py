@@ -182,7 +182,7 @@ def play_level(map_dir, level_data, health, money, level, data):
         return TOWER_DATA[tower_type][0].get(attribute) * bonus.get_bonus_data(attribute) if is_bonus else TOWER_DATA[tower_type][0].get(attribute)
 
     def restart():
-        save_data(world.reward)
+        save_data(round(world.reward * world.bonus.get_bonus_data("coin_bonus")))
         world.reward = 0
         world.restart(c.HEALTH, c.MONEY)
         speed_up_button.change_image(speed_btn_image[world.game_speed - 1])
@@ -382,12 +382,12 @@ def play_level(map_dir, level_data, health, money, level, data):
             screen.blit(reward_surface, reward_surface_rect)
             screen.blit(coin_image, coin_image_rect)
             draw_text("Reward", text_font, (255, 255, 255), 630, 450, center=True)
-            draw_text(f'{world.reward}', text_font, (255, 255, 255), 650, 522, center=True)
+            draw_text(f'{round(world.reward * world.bonus.get_bonus_data("coin_bonus"))}', text_font, (255, 255, 255), 650, 522, center=True)
             if game_restart_button.draw(screen):
                 restart()
             if game_end_button.draw(screen):
                 world.game_over = True
-                save_data(world.reward)
+                save_data(round(world.reward * world.bonus.get_bonus_data("coin_bonus")))
                 world.reward = 0
                 run = False
 
@@ -396,7 +396,7 @@ def play_level(map_dir, level_data, health, money, level, data):
             screen.blit(reward_surface, reward_surface_rect)
             screen.blit(coin_image, coin_image_rect)
             draw_text("Reward", text_font, (255, 255, 255), 630, 450, center=True)
-            draw_text(f'{world.reward}', text_font, (255, 255, 255), 650, 522, center=True)
+            draw_text(f'{round(world.reward * world.bonus.get_bonus_data("coin_bonus"))}', text_font, (255, 255, 255), 650, 522, center=True)
             if game_resume_button.draw(screen):
                 world.game_pause = not world.game_pause
                 game_pause()
@@ -404,7 +404,7 @@ def play_level(map_dir, level_data, health, money, level, data):
                 restart()
             if game_end_button.draw(screen):
                 world.game_over = True
-                save_data(world.reward)
+                save_data(round(world.reward * world.bonus.get_bonus_data("coin_bonus")))
                 world.reward = 0
                 run = False
 
@@ -465,7 +465,7 @@ def menu(data):
             data = load_data()
             coin = data["coin"]
         if research_button.draw(screen):
-            pass
+            research(data)
         if settings_button.draw(screen):
             pass
         if exit_button.draw(screen):
@@ -521,12 +521,48 @@ def select_level(data):
 
 
 def research(data):
+
+    coin = data["coin"]
+    coin_image = pg.image.load('assets/image/coin.png').convert_alpha()
+    level_image = pg.image.load('assets/buttons/level.png').convert_alpha()
+    arrow_back_image = pg.image.load('assets/buttons/arrow_back.png').convert_alpha()
+    coin_image_rect = coin_image.get_rect()
+    coin_image_rect.topleft = (1000, 10)
+
+    level_button = Button(0, 0, level_image)
+    arrow_back_button = Button(100, 100, arrow_back_image, center=True)
+    bonus_attribute = ["starting_money_bonus", "starting_health_bonus", "rotate_speed", "damage", "range", "atk_speed", "sell", "cost", "coin_bonus"]
+
     run = True
     while run:
         clock.tick(c.FPS)
 
         screen.fill((0, 0, 0))
 
+        screen.blit(coin_image, coin_image_rect)
+        draw_text(f'{coin}', text_font, "grey100", 1080, 32)
+
+        if arrow_back_button.draw(screen):
+            run = False
+
+        for i in range(9):
+            x = 299 + (i % 3) * 331
+            y = 250 + (i // 3) * 200
+            level_button.change_pos(x, y, True)
+            level = data[bonus_attribute[i]]
+            cost = c.RESEARCH[bonus_attribute[i]][level]["cost"]
+            if level_button.draw(screen) and coin >= cost and level < 5:
+                level += 1
+                coin -= cost
+                data[bonus_attribute[i]] = level
+                data["coin"] = coin
+                with open('assets/data.json', 'w') as f:
+                    json.dump(data, f)
+            draw_text(f'{level}', text_font, "grey100", x, y, center=True)
+            draw_text(bonus_attribute[i], text_font, "grey100", x, y + 60, center=True)
+            draw_text(c.RESEARCH[bonus_attribute[i]][level]["description"], text_font, "grey100", x, y + 90, center=True)
+            if level < 5:
+                draw_text(f'cost: {c.RESEARCH[bonus_attribute[i]][level]["cost"]}', text_font, "grey100", x, y + 120, center=True)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
