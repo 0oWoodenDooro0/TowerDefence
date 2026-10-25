@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tower-defence"
+version = "1.0.0"
+description = "A 2D grid-based tower defence game built with Pygame"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pygame>=2.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
