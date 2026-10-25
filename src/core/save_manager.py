@@ -5,7 +5,7 @@ from src.core.bonus import Bonus
 
 
 class SaveManager:
-    """Handles persistence of player progression (Coin, Research upgrades)."""
+    """Handles persistence of player progression (Coin and Research levels)."""
 
     def __init__(self, filepath: str = "assets/data.json"):
         self.filepath = filepath
@@ -31,10 +31,13 @@ class SaveManager:
             return self.reset_to_default()
 
     def save_data(self, data: dict) -> None:
-        """Saves progression data to disk."""
-        os.makedirs(os.path.dirname(os.path.abspath(self.filepath)), exist_ok=True)
-        with open(self.filepath, "w", encoding="utf-8") as f:
+        """Saves progression data atomically to disk to prevent corrupted writes."""
+        dir_name = os.path.dirname(os.path.abspath(self.filepath))
+        os.makedirs(dir_name, exist_ok=True)
+        temp_filepath = f"{self.filepath}.tmp"
+        with open(temp_filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
+        os.replace(temp_filepath, self.filepath)
 
     def reset_to_default(self) -> dict:
         """Resets saved data to default values and persists to disk."""

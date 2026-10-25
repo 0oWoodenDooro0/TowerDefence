@@ -227,6 +227,22 @@ class GameplayScene(Scene):
                 self.world.reset_wave()
                 self.world.process_enemies()
 
+    def draw_reward_modal(self, surface: pg.Surface, show_resume: bool = False):
+        surface.blit(self.pause_mask, self.pause_mask_rect)
+        surface.blit(self.reward_surface, self.reward_surface_rect)
+        surface.blit(self.coin_image, self.coin_rect)
+        draw_text(surface, "Reward", self.text_font, (255, 255, 255), 630, 450, center=True)
+        reward_amt = round(self.world.reward * self.world.bonus.get_bonus_data("coin_bonus"))
+        draw_text(surface, f"{reward_amt}", self.text_font, (255, 255, 255), 650, 522, center=True)
+
+        if show_resume and self.game_resume_btn.draw(surface):
+            self.world.game_pause = not self.world.game_pause
+            self.game_pause_toggle()
+        if self.game_restart_btn.draw(surface):
+            self.restart()
+        if self.game_end_btn.draw(surface):
+            self.end_game()
+
     def draw(self, surface: pg.Surface):
         if not self.world:
             return
@@ -362,31 +378,7 @@ class GameplayScene(Scene):
             self.selected_tile = None
             self.selected_tower_type = None
             self.selected_tower_pos = None
-
-            surface.blit(self.pause_mask, self.pause_mask_rect)
-            surface.blit(self.reward_surface, self.reward_surface_rect)
-            surface.blit(self.coin_image, self.coin_rect)
-            draw_text(surface, "Reward", self.text_font, (255, 255, 255), 630, 450, center=True)
-            reward_amt = round(self.world.reward * self.world.bonus.get_bonus_data("coin_bonus"))
-            draw_text(surface, f"{reward_amt}", self.text_font, (255, 255, 255), 650, 522, center=True)
-
-            if self.game_restart_btn.draw(surface):
-                self.restart()
-            if self.game_end_btn.draw(surface):
-                self.end_game()
+            self.draw_reward_modal(surface, show_resume=False)
 
         if self.world.game_pause:
-            surface.blit(self.pause_mask, self.pause_mask_rect)
-            surface.blit(self.reward_surface, self.reward_surface_rect)
-            surface.blit(self.coin_image, self.coin_rect)
-            draw_text(surface, "Reward", self.text_font, (255, 255, 255), 630, 450, center=True)
-            reward_amt = round(self.world.reward * self.world.bonus.get_bonus_data("coin_bonus"))
-            draw_text(surface, f"{reward_amt}", self.text_font, (255, 255, 255), 650, 522, center=True)
-
-            if self.game_resume_btn.draw(surface):
-                self.world.game_pause = not self.world.game_pause
-                self.game_pause_toggle()
-            if self.game_restart_btn.draw(surface):
-                self.restart()
-            if self.game_end_btn.draw(surface):
-                self.end_game()
+            self.draw_reward_modal(surface, show_resume=True)

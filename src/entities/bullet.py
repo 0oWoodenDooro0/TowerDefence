@@ -6,6 +6,8 @@ from pygame import Vector2
 from src.entities.enemy import Enemy
 from src.data.tower_data import TOWER_EFFECTIVENESS
 
+_BULLET_IMAGE_CACHE: dict[str, pg.Surface] = {}
+
 
 class Bullet(pg.sprite.Sprite):
     def __init__(self, x, y, target: Enemy, damage: int, tower_type: str, bullet_image='assets/bullet/bullet.png'):
@@ -13,11 +15,13 @@ class Bullet(pg.sprite.Sprite):
         self.speed = 15
         self.pos = Vector2(x, y)
         if isinstance(bullet_image, str):
-            raw = pg.image.load(bullet_image)
-            try:
-                self.image = raw.convert_alpha()
-            except pg.error:
-                self.image = raw
+            if bullet_image not in _BULLET_IMAGE_CACHE:
+                raw = pg.image.load(bullet_image)
+                try:
+                    _BULLET_IMAGE_CACHE[bullet_image] = raw.convert_alpha()
+                except pg.error:
+                    _BULLET_IMAGE_CACHE[bullet_image] = raw
+            self.image = _BULLET_IMAGE_CACHE[bullet_image]
         else:
             self.image = bullet_image
 

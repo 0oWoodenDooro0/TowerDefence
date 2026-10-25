@@ -7,7 +7,7 @@ import src.data.constants as c
 
 
 class LevelSelectScene(Scene):
-    """Level selection scene listing available battle stages."""
+    """Level selection scene listing available battle levels."""
 
     def __init__(self, scene_manager):
         super().__init__(scene_manager)

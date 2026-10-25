@@ -1,3 +1,4 @@
+import math
 import pygame as pg
 from world import World
 from enemy import Enemy
@@ -112,3 +113,39 @@ def test_tower_upgrade_and_attribute_scaling(mock_bonus):
     tower.upgrade()
     assert tower.level == initial_level + 1
     assert tower.damage > initial_damage
+
+
+def test_tower_targeting_and_attack_cycle(sample_level_data, headless_surface, mock_bonus):
+    world = World(headless_surface, sample_level_data, 10, 200, 0, 1, mock_bonus)
+    enemy_images = {
+        "regular": pg.Surface((32, 32)),
+        "fast": pg.Surface((32, 32)),
+        "strong": pg.Surface((32, 32))
+    }
+    tower_images = {"basic": pg.Surface((32, 32))}
+    tower_base_images = {"basic": pg.Surface((32, 32))}
+
+    # Place tower near waypoint[0]
+    first_waypoint = world.waypoints[0]
+    tile_x = int(first_waypoint[0] // c.TILE_SIZE)
+    tile_y = int(first_waypoint[1] // c.TILE_SIZE)
+    tower = AttackTower(tower_images, tower_base_images, "basic", (tile_x, tile_y), mock_bonus)
+
+    enemy = Enemy("regular", world.waypoints, enemy_images, wave=1, level=1)
+    enemy_group = pg.sprite.Group(enemy)
+    bullet_group = pg.sprite.Group()
+
+    # Align tower angle with target direction and set last_shot before cooldown
+    x_dist = enemy.pos[0] - tower.x
+    y_dist = enemy.pos[1] - tower.y
+    target_angle = math.degrees(math.atan2(-y_dist, x_dist))
+    tower.angle = target_angle
+    tower.last_shot = -1000
+
+    tower.update(enemy_group, bullet_group, world)
+
+    # Bullet should be spawned when targeting enemy in range and aligned
+    assert len(bullet_group) == 1
+    bullet = list(bullet_group)[0]
+    assert bullet.damage == tower.damage
+    assert bullet.target is enemy

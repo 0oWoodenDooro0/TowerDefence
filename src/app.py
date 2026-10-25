@@ -31,11 +31,11 @@ class GameApp:
 
     def run(self):
         while self.scene_manager.running:
-            self.clock.tick(c.FPS)
+            dt = self.clock.tick(c.FPS) / 1000.0
 
             events = pg.event.get()
             self.scene_manager.handle_events(events)
-            self.scene_manager.update()
+            self.scene_manager.update(dt)
             self.scene_manager.draw(self.screen)
 
             pg.display.flip()

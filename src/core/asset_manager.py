@@ -84,6 +84,12 @@ class AssetManager:
             "strong": self.get_image("assets/enemy/enemy3.png"),
         }
 
+    def get_bullet_images(self) -> dict[str, pg.Surface]:
+        return {
+            "bullet": self.get_image("assets/bullet/bullet.png"),
+            "diffusion_bullet": self.get_image("assets/bullet/diffusion_bullet.png"),
+        }
+
     def get_speed_button_images(self) -> list[pg.Surface]:
         return [
             self.get_image("assets/buttons/speed1x.png"),

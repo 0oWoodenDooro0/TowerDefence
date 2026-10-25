@@ -6,7 +6,7 @@ from src.data.research_data import RESEARCH
 
 
 class ResearchScene(Scene):
-    """Research laboratory scene for upgrading permanent global modifiers using Coins."""
+    """Research laboratory scene for upgrading permanent global Bonus levels using Coins."""
 
     BONUS_ATTRIBUTES = [
         "starting_money_bonus", "starting_health_bonus", "rotate_speed",
