@@ -338,7 +338,7 @@ class GameplayScene(Scene):
                             draw_text(surface, f"range: {round(self.selected_tower.get_attribute(self.selected_tower.level - 1, 'range'), 2)} -> {round(self.selected_tower.get_attribute(self.selected_tower.level, 'range'), 2)}", self.text_font, "black", c.SCREEN_WIDTH + 5, 210)
                             draw_text(surface, f"attack speed: {round(self.selected_tower.get_attribute(self.selected_tower.level - 1, 'atk_speed'), 2)} -> {round(self.selected_tower.get_attribute(self.selected_tower.level, 'atk_speed'), 2)}", self.text_font, "black", c.SCREEN_WIDTH + 5, 240)
                         case "freeze":
-                            draw_text(surface, f"slow rate: {1 - self.selected_tower.get_attribute(self.selected_tower.level - 1, 'slow_rate'):.2f} -> {1 - self.selected_tower.get_attribute(self.selected_tower.level, 'slow_rate'):.2f}", self.text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                            draw_text(surface, f"slow rate: {1 - self.selected_tower.get_attribute(self.selected_tower.level - 1, 'slow_rate', bonus=False):.2f} -> {1 - self.selected_tower.get_attribute(self.selected_tower.level, 'slow_rate', bonus=False):.2f}", self.text_font, "black", c.SCREEN_WIDTH + 5, 180)
                             draw_text(surface, f"range: {round(self.selected_tower.get_attribute(self.selected_tower.level - 1, 'range'), 2)} -> {round(self.selected_tower.get_attribute(self.selected_tower.level, 'range'), 2)}", self.text_font, "black", c.SCREEN_WIDTH + 5, 210)
 
                     if self.world.money >= self.selected_tower.cost:
@@ -365,7 +365,7 @@ class GameplayScene(Scene):
                             draw_text(surface, f"range: {round(self.selected_tower.get_attribute(self.selected_tower.level - 1, 'range'), 2)}", self.text_font, "black", c.SCREEN_WIDTH + 5, 210)
                             draw_text(surface, f"attack speed: {round(self.selected_tower.get_attribute(self.selected_tower.level - 1, 'atk_speed'), 2)}", self.text_font, "black", c.SCREEN_WIDTH + 5, 240)
                         case "freeze":
-                            draw_text(surface, f"slow rate: {1 - self.selected_tower.get_attribute(self.selected_tower.level - 1, 'slow_rate'):.2f}", self.text_font, "black", c.SCREEN_WIDTH + 5, 180)
+                            draw_text(surface, f"slow rate: {1 - self.selected_tower.get_attribute(self.selected_tower.level - 1, 'slow_rate', bonus=False):.2f}", self.text_font, "black", c.SCREEN_WIDTH + 5, 180)
                             draw_text(surface, f"range: {round(self.selected_tower.get_attribute(self.selected_tower.level - 1, 'range'), 2)}", self.text_font, "black", c.SCREEN_WIDTH + 5, 210)
 
                 draw_text(surface, f"SELL: {self.selected_tower.sell}", self.text_font, "black", c.SCREEN_WIDTH + 170, c.SCREEN_HEIGHT - 110)

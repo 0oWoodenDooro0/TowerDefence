@@ -1,9 +1,11 @@
 import os
+import pygame as pg
 import pytest
 from src.core.save_manager import SaveManager
 from src.core.bonus import Bonus
 from src.data.constants import DEFAULT_DATA
 from src.data.research_data import RESEARCH
+from src.entities.tower import EffectTower
 
 
 def test_save_manager_fallback_on_missing_file(tmp_path):
@@ -59,3 +61,16 @@ def test_bonus_calculation_parity(tmp_path):
     assert bonus.get_bonus_data("starting_money_bonus") == RESEARCH["starting_money_bonus"][1]["bonus"]
     # At level 0, damage bonus is 0 (or baseline)
     assert bonus.get_bonus_data("damage") == RESEARCH["damage"][0]["bonus"]
+
+
+def test_bonus_slow_rate_fallback(tmp_path):
+    save_file = str(tmp_path / "data.json")
+    manager = SaveManager(save_file)
+    bonus = manager.get_bonus()
+
+    assert bonus.get_bonus_data("slow_rate") == 1.0
+
+    tower_images = {"freeze": pg.Surface((32, 32))}
+    tower_base_images = {"freeze": pg.Surface((32, 32))}
+    tower = EffectTower(tower_images, tower_base_images, "freeze", (0, 0), bonus)
+    assert tower.get_attribute(0, "slow_rate", bonus=True) == 0.15

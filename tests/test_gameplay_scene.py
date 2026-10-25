@@ -96,3 +96,33 @@ def test_gameplay_scene_headless_render(tmp_path):
     surface = pg.Surface((1260, 960))
     # Should render all layers without crashing
     gameplay_scene.draw(surface)
+
+
+def test_gameplay_scene_freeze_tower_inspection(tmp_path):
+    save_file = str(tmp_path / "data.json")
+    save_manager = SaveManager(save_file)
+
+    manager = SceneManager(save_manager=save_manager)
+    gameplay_scene = GameplayScene(manager)
+    manager.register("gameplay", gameplay_scene)
+    manager.switch_to("gameplay", level=1)
+
+    surface = pg.Surface((1260, 960))
+    gameplay_scene.selected_tower_type = "freeze"
+    tower, pos = gameplay_scene.create_tower((2, 2))
+
+    # Select the freeze tower
+    gameplay_scene.selected_tower = tower
+    gameplay_scene.selected_tower_pos = pos
+    gameplay_scene.selected_tile = None
+    gameplay_scene.selected_tower_type = None
+
+    # Base level inspection
+    gameplay_scene.draw(surface)
+
+    # Upgrade to max level
+    while tower.level < 6:
+        tower.upgrade()
+
+    # Max level inspection
+    gameplay_scene.draw(surface)
