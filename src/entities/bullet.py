@@ -1,0 +1,76 @@
+import math
+
+import pygame as pg
+from pygame import Vector2
+
+from src.entities.enemy import Enemy
+from src.data.tower_data import TOWER_EFFECTIVENESS
+
+
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, x, y, target: Enemy, damage: int, tower_type: str, bullet_image='assets/bullet/bullet.png'):
+        pg.sprite.Sprite.__init__(self)
+        self.speed = 15
+        self.pos = Vector2(x, y)
+        if isinstance(bullet_image, str):
+            raw = pg.image.load(bullet_image)
+            try:
+                self.image = raw.convert_alpha()
+            except pg.error:
+                self.image = raw
+        else:
+            self.image = bullet_image
+
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.target = target
+        self.damage = damage
+        self.collided = False
+        self.tower_type = tower_type
+
+    def update(self, world, enemy_group):
+        target_vector = Vector2(self.target.pos)
+        movement = target_vector - self.pos
+        dist = movement.length()
+        if dist >= self.speed * world.game_speed:
+            self.pos += movement.normalize() * self.speed * world.game_speed
+        else:
+            if dist != 0:
+                self.pos += movement.normalize() * dist
+            self.collided = True
+            self.target.health -= self.damage * TOWER_EFFECTIVENESS[self.tower_type].get(self.target.enemy_type)
+
+        if self.collided:
+            self.kill()
+
+        self.rect.center = self.pos
+
+
+class DiffusionBullet(Bullet):
+    def __init__(self, x, y, target: Enemy, damage: int, tower_type: str, bullet_image='assets/bullet/diffusion_bullet.png'):
+        Bullet.__init__(self, x, y, target, damage, tower_type, bullet_image)
+        self.range = 42
+
+    def update(self, world, enemy_group):
+        target_vector = Vector2(self.target.pos)
+        movement = target_vector - self.pos
+        dist = movement.length()
+        if dist >= self.speed * world.game_speed:
+            self.pos += movement.normalize() * self.speed * world.game_speed
+        else:
+            if dist != 0:
+                self.pos += movement.normalize() * dist
+            self.collided = True
+            for enemy in enemy_group:
+                if enemy.health > 0 and self.target != enemy:
+                    x_dist = enemy.pos[0] - self.pos[0]
+                    y_dist = enemy.pos[1] - self.pos[1]
+                    dist = math.sqrt(x_dist ** 2 + y_dist ** 2)
+                    if dist < self.range:
+                        enemy.health -= 0.6 * self.damage * TOWER_EFFECTIVENESS[self.tower_type].get(self.target.enemy_type)
+            self.target.health -= self.damage * TOWER_EFFECTIVENESS[self.tower_type].get(self.target.enemy_type)
+
+        if self.collided:
+            self.kill()
+
+        self.rect.center = self.pos
