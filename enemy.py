@@ -44,6 +44,7 @@ class Enemy(pg.sprite.Sprite):
             world.health -= 1
             world.missed_enemies += 1
             self.kill()
+            return
 
         dist = self.movement.length()
 
@@ -57,6 +58,8 @@ class Enemy(pg.sprite.Sprite):
         self.rect.center = self.pos
 
     def rotate(self):
+        if not self.target:
+            return
         dist = self.target - self.pos
 
         self.angle = math.degrees(math.atan2(-dist[1], dist[0]))
