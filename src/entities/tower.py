@@ -69,7 +69,12 @@ class Tower(pg.sprite.Sprite):
             surface.blit(range_image, range_rect)
 
     def get_attribute(self, level: int, attribute: str, bonus: bool = True):
-        return TOWER_DATA[self.tower_type][level].get(attribute) * self.bonus.get_bonus_data(attribute) if bonus else TOWER_DATA[self.tower_type][level].get(attribute)
+        base_value = TOWER_DATA[self.tower_type][level].get(attribute)
+        if base_value is None:
+            return None
+        if not bonus or not self.bonus:
+            return base_value
+        return base_value * self.bonus.get_bonus_data(attribute)
 
 
 class AttackTower(Tower):
