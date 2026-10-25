@@ -6,3 +6,4 @@ __pycache__/
 .worktrees/
 assets/data.json
 .idea/
+*.egg-info/
